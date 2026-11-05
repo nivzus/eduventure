@@ -1,14 +1,11 @@
+import { formatCompact, formatNumber } from '@/lib/utils';
 import { differenceInCalendarDays, format, isValid } from 'date-fns';
 import { az } from 'date-fns/locale';
 
 /* ─────────── numbers ─────────── */
 
-const nf = new Intl.NumberFormat('az-AZ', { maximumFractionDigits: 0 });
-const nf1 = new Intl.NumberFormat('az-AZ', { maximumFractionDigits: 1 });
-
 export function fmtNumber(n: number | null | undefined, digits: 0 | 1 = 0): string {
-  if (n == null || Number.isNaN(n)) return '—';
-  return (digits === 1 ? nf1 : nf).format(n);
+  return formatNumber(n, digits);
 }
 
 /** Accepts 0-1 or 0-100 and always returns 0-100. */
@@ -23,9 +20,7 @@ export function fmtPercent(n: number | null | undefined): string {
 }
 
 export function compact(n: number): string {
-  if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
-  if (Math.abs(n) >= 10_000) return `${Math.round(n / 1000)}K`;
-  return fmtNumber(n);
+  return Math.abs(n) < 10_000 ? fmtNumber(n) : formatCompact(n);
 }
 
 /* ─────────── dates ─────────── */

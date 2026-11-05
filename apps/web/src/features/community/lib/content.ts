@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import type { ContentType, QuestPeriod, QuestType, Role } from '../types';
 
-export type Tone = 'neutral' | 'signal' | 'ember' | 'aurora' | 'glacier' | 'moss' | 'danger';
+export type { Tone } from '@/lib/utils';
+import type { Tone } from '@/lib/utils';
 
 export const CONTENT_META: Record<ContentType, { label: string; plural: string; icon: LucideIcon; tone: Tone }> = {
   QUIZ: { label: 'Test', plural: 'Testlər', icon: ListChecks, tone: 'signal' },
@@ -91,10 +92,4 @@ export function groupColorVar(color?: string | null): string {
   if (!color) return 'var(--aurora)';
   if ((GROUP_COLORS as readonly string[]).includes(color)) return `var(--${color})`;
   return color;
-}
-
-/** XP needed to reach `level` (level = floor(sqrt(xp/100)) + 1). */
-export function xpForLevel(level: number): number {
-  const l = Math.max(1, level);
-  return 100 * (l - 1) * (l - 1);
 }
