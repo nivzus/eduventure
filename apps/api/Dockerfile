@@ -63,6 +63,9 @@ COPY prisma ./prisma
 RUN prisma generate
 
 COPY --from=build /app/dist ./dist
+# The demo seed (prisma/seed.ts, run by tsx when SEED_ON_START=true) grades simulated answers with the
+# real grading engine, so ship that one self-contained source file next to prisma/.
+COPY src/modules/quizzes/question-engine.ts ./src/modules/quizzes/question-engine.ts
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
  && mkdir -p /app/uploads \
