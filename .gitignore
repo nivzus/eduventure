@@ -1,24 +1,28 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.js
 
-# testing
-/coverage
+# builds
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
 
-# production
-/build
-
-# misc
-.DS_Store
+# env
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# runtime
+uploads/
+apps/api/uploads/
+*.log
+.DS_Store
+
+# agent coordination markers
+.foundation-ready
+.scaffold-ready
