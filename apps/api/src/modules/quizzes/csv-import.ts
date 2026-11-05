@@ -35,7 +35,7 @@ function splitList(raw: string | undefined): string[] {
 
 export function parseQuestionsCsv(buffer: Buffer | undefined): { questions: ParsedCsvQuestion[]; errors: CsvRowError[] } {
   if (!buffer || buffer.length === 0) throw new BadRequestException('CSV faylı tələb olunur (multipart "file")');
-  const text = buffer.toString('utf8').replace(/^﻿/, '');
+  const text = buffer.toString('utf8').replace(/^\uFEFF/, '');
   const parsed = Papa.parse<Record<string, string>>(text, {
     header: true,
     skipEmptyLines: 'greedy',

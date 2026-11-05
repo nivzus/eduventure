@@ -33,7 +33,8 @@ fi
 
 if [ "${SEED_ON_START:-false}" = "true" ]; then
   log "seeding demo data: prisma db seed"
-  prisma db seed || log "seed failed (already seeded?) - continuing"
+  # SEED_ON_START=true is an explicit opt-in to the (database-wiping) demo seed
+  ALLOW_DEMO_SEED=1 prisma db seed || log "seed failed (already seeded?) - continuing"
 fi
 
 mkdir -p "$UPLOAD_DIR" 2>/dev/null || true

@@ -258,3 +258,14 @@ docker compose -f docker-compose.prod.yml up -d --build
 **Demo accounts:** `admin@eduventure.az` / `Admin123!` · `seda@eduventure.az` / `Teacher123!` (teacher) · students / `Student123!`.
 
 **Docs:** [Architecture](docs/ARCHITECTURE.md) · [Deployment](docs/DEPLOY.md) (Vercel + Render/Railway/Fly + managed Postgres, or a single VPS with Docker Compose) · [Spec](docs/SPEC.md).
+
+## Production checklist / Prodakşn üçün yoxlama siyahısı
+
+1. `NODE_ENV=production` ilə API zəif və ya boş açarlarla **başlamır** — `JWT_ACCESS_SECRET` və `JWT_REFRESH_SECRET` üçün `openssl rand -base64 48` istifadə edin (ikisi fərqli olmalıdır), `DATABASE_URL` və `WEB_ORIGIN` mütləqdir.
+2. Demo seed (`npm run seed`) bazanı **silir** və prodakşnda işləməkdən imtina edir. Real hesablar üçün:
+   ```bash
+   ADMIN_EMAIL=... ADMIN_PASSWORD=... TEACHER_EMAIL=... TEACHER_PASSWORD=... npm --prefix apps/api run seed:prod
+   ```
+   (təhlükəsizdir, heç nəyi silmir, təkrar işlədilə bilər).
+3. AI sual generasiyası üçün `GEMINI_API_KEY` (boş olduqda nümunə suallar qaytarılır).
+4. Yoxlamalar: `npm --prefix apps/api run lint && npm --prefix apps/api test`, `npm --prefix apps/web run lint`.

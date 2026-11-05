@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import { assertProductionEnv } from './common/env';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -8,6 +9,7 @@ import { AppModule } from './app.module';
 import { uploadDir } from './common/env';
 
 async function bootstrap() {
+  assertProductionEnv();
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.setGlobalPrefix('api');
   app.use(cookieParser());

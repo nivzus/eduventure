@@ -8,7 +8,7 @@
 # IMPORTANT: Next.js resolves `rewrites()` (/api/:path* -> ${API_URL}/api/:path*) at BUILD
 # time, so API_URL must be passed as a build arg (it is also set at runtime for SSR code).
 #
-# Uses the small `output: 'standalone'` bundle when next.config.ts enables it and falls
+# Uses the small `output: 'standalone'` bundle when next.config.mjs enables it and falls
 # back to a regular `next start` bundle (production node_modules) otherwise.
 
 # ─── base ───
@@ -41,7 +41,7 @@ RUN set -eu; mkdir -p /out; \
       mkdir -p /out/.next; \
       cp -a .next/static /out/.next/static; \
     else \
-      echo "==> no standalone output: shipping a 'next start' bundle (add output: 'standalone' to next.config.ts for a ~4x smaller image)"; \
+      echo "==> no standalone output: shipping a 'next start' bundle (add output: 'standalone' to next.config.mjs for a ~4x smaller image)"; \
       npm prune --omit=dev; \
       cp -a package.json node_modules .next /out/; \
       for f in next.config.ts next.config.mjs next.config.js; do if [ -f "$f" ]; then cp -a "$f" /out/; fi; done; \
