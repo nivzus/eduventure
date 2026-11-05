@@ -55,7 +55,7 @@ export class CommentsService {
         if (!g) throw new NotFoundException('Qrup tapılmadı');
         const audience = [g.teacherId, ...g.members.map((m) => m.userId)];
         if (!isStaff(user) && !audience.includes(user.id)) throw new NotFoundException('Qrup tapılmadı');
-        return { link: `/groups/${g.id}#comments`, label: `“${g.name}” qrupu`, audience };
+        return { link: `/groups/${g.id}#comments`, label: `“${g.name}” qrupunda`, audience };
       }
       case CommentTarget.ATTEMPT: {
         const at = await this.prisma.attempt.findUnique({
@@ -66,7 +66,11 @@ export class CommentsService {
         if (at.userId !== user.id && !isStaff(user) && at.quiz.authorId !== user.id) {
           throw new NotFoundException('Cəhd tapılmadı');
         }
-        return { link: `/attempts/${at.id}/review`, label: `“${at.quiz.title}” nəticəsi`, ownerId: at.userId };
+        return {
+          link: `/attempts/${at.id}/review`,
+          label: `“${at.quiz.title}” testindəki nəticəniz haqqında`,
+          ownerId: at.userId,
+        };
       }
     }
   }
@@ -130,12 +134,12 @@ export class CommentsService {
     } else if (!parent && dto.targetType === CommentTarget.GROUP && info.audience) {
       await this.notifications.notify(
         info.audience.filter((id) => id !== user.id),
-        { type: 'COMMENT', title: `${user.name} ${info.label} müzakirəsində yazdı`, body: snippet(body), link: info.link },
+        { type: 'COMMENT', title: `${user.name} ${info.label} yeni mesaj yazdı`, body: snippet(body), link: info.link },
       );
     } else if (!parent && dto.targetType === CommentTarget.ATTEMPT && info.ownerId && info.ownerId !== user.id) {
       await this.notifications.notify(info.ownerId, {
         type: 'COMMENT',
-        title: `${user.name} ${info.label} haqqında şərh yazdı`,
+        title: `${user.name} ${info.label} şərh yazdı`,
         body: snippet(body),
         link: info.link,
       });

@@ -135,6 +135,11 @@ export class AssignmentsService {
     if (!meta || !(await this.access.canView(user, dto.contentType, meta))) {
       throw new NotFoundException('Məzmun tapılmadı');
     }
+    // Assignees must be able to open it.
+    if (meta.status !== 'PUBLISHED') throw new BadRequestException('Yalnız dərc edilmiş məzmun tapşırıq kimi verilə bilər');
+    if (meta.visibility === Visibility.PRIVATE) {
+      throw new BadRequestException('Şəxsi (PRIVATE) məzmun tələbələrə görünmür — əvvəlcə görünürlüyü dəyişin');
+    }
     const groupIds = uniqStrings(dto.groupIds);
     const userIds = uniqStrings(dto.userIds);
     if (!groupIds.length && !userIds.length) throw new BadRequestException('Ən azı bir qrup və ya istifadəçi seçin');
