@@ -132,7 +132,7 @@ sequenceDiagram
 
 Client side (`apps/web/src/lib/api.ts`): `credentials: 'include'`, on a `401` it calls `POST /api/auth/refresh` **once** and retries the original request; if refresh fails the user is treated as logged out. `useAuth()` exposes `{ user, isLoading, login, register, logout, refetch }` and `<RequireRole>` gates Studio/Admin screens (the API enforces roles independently).
 
-Server components call the API directly at `API_URL` (no proxy hop) and forward the incoming cookies.
+Authenticated data is fetched from client components (TanStack Query) through the same-origin `/api` proxy; code running on the server uses `API_URL` directly.
 
 ## 4. Quiz attempts and the grading engine
 

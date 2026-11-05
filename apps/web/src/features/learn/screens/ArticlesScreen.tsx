@@ -89,7 +89,7 @@ export function ArticlesScreen() {
         }
       />
 
-      <div className="sticky top-[var(--topbar-h,64px)] z-20 -mx-4 mb-8 border-b border-line bg-bg/85 px-4 py-3 backdrop-blur-xl md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
+      <div className="sticky top-16 z-20 -mx-4 mb-8 border-b border-line bg-bg/85 px-4 py-3 backdrop-blur-xl md:static md:mx-0 md:border-0 md:bg-transparent md:p-0 md:backdrop-blur-none">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <SearchField value={q} onChange={setQ} placeholder="Başlıq, mövzu və ya teq üzrə axtar…" className="lg:w-80" />
           <FilterChips

@@ -36,7 +36,10 @@ export class PathsService {
       where: { AND: filters },
       include: {
         author: AUTHOR,
-        items: { orderBy: { order: 'asc' }, select: { courseId: true, course: { select: { id: true, title: true } } } },
+        items: {
+          orderBy: { order: 'asc' },
+          select: { courseId: true, course: { select: { id: true, title: true, status: true, authorId: true } } },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -52,7 +55,10 @@ export class PathsService {
       return {
         ...this.content.hidePasscode(user, r),
         courseIds: items.map((i) => i.courseId),
-        courses: items.map((i) => i.course),
+        // titles of courses the viewer may see (drafts of other authors are left out)
+        courses: items
+          .filter((i) => i.course.status === 'PUBLISHED' || this.access.isOwner(user, i.course) || user.role === 'ADMIN')
+          .map((i) => ({ id: i.course.id, title: i.course.title })),
         courseCount: items.length,
         completedCourses: p?.completedCourses ?? 0,
         progress: p?.progress ?? 0,

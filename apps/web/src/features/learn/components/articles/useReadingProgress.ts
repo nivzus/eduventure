@@ -1,5 +1,6 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useMotionValueEvent, useScroll, useSpring, type MotionValue } from 'motion/react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fireConfetti } from '@/components/motion';
@@ -33,6 +34,7 @@ export function useReadingProgress(opts: {
   const smooth = useSpring(scrollYProgress, { stiffness: 260, damping: 40, restDelta: 0.001 });
   const save = useSaveArticleProgress(articleId);
   const auth = useAuth();
+  const qc = useQueryClient();
 
   const [percent, setPercent] = useState(0);
   const [completed, setCompleted] = useState(initiallyCompleted);
@@ -67,8 +69,9 @@ export function useReadingProgress(opts: {
             const xp = res?.xpGained ?? 0;
             toast.success(xp > 0 ? `Məqalə tamamlandı! +${xp} XP` : 'Məqalə tamamlandı!');
             if (xp > 0) {
-              fireConfetti();
+              fireConfetti({ kind: 'summit' });
               auth.refetch?.();
+              qc.invalidateQueries({ queryKey: ['me'] });
             }
           }
         },
@@ -83,7 +86,7 @@ export function useReadingProgress(opts: {
         },
       });
     },
-    [save, auth],
+    [save, auth, qc],
   );
 
   const flush = useCallback(() => {

@@ -341,7 +341,7 @@ function Reader({ article }: { article: Article }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ type: 'spring', stiffness: 380, damping: 30, delay: 0.6 }}
-            className="ev-noprint fixed bottom-24 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border border-line-strong bg-surface/90 px-4 py-2.5 text-sm font-medium shadow-pop backdrop-blur-xl md:bottom-8"
+            className="ev-noprint fixed bottom-24 left-1/2 z-40 inline-flex -translate-x-1/2 items-center gap-2 rounded-full border border-line-strong bg-surface/90 px-4 py-2.5 text-sm font-medium shadow-pop backdrop-blur-xl lg:bottom-8"
           >
             <span className="size-2 rounded-full bg-signal" />
             {Math.round(initial)}%-dən davam et

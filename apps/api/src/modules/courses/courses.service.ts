@@ -125,6 +125,7 @@ export class CoursesService {
     const completion = await this.prisma.courseCompletion.findUnique({
       where: { userId_courseId: { userId: user.id, courseId: course.id } },
     });
+    const access = await this.itemAccess(user, items);
 
     const outItems = items.map((i) => ({
       id: i.id,
@@ -138,6 +139,10 @@ export class CoursesService {
       quiz: i.quiz ? (({ _count, ...q }) => ({ ...q, questionCount: _count.questions }))(i.quiz) : null,
       deck: i.deck ? (({ _count, ...d }) => ({ ...d, cardCount: _count.cards }))(i.deck) : null,
       done: this.progress.isItemDone(i, sets),
+      /** false → the viewer cannot open this item (draft / private / other groups). */
+      available: access.available.has(i.id),
+      /** true → PASSCODE item not yet unlocked by the viewer. */
+      locked: access.locked.has(i.id),
     }));
     const doneCount = outItems.filter((i) => i.done).length;
 
@@ -156,6 +161,44 @@ export class CoursesService {
       paths,
       locked: false,
     };
+  }
+
+  /** Which course items (by CourseItem.id) the viewer can open, and which are passcode-locked. */
+  private async itemAccess(
+    user: AuthUser,
+    items: { id: string; type: CourseItemType; articleId: string | null; quizId: string | null; deckId: string | null }[],
+  ) {
+    const ids = (t: CourseItemType, pick: (i: (typeof items)[number]) => string | null) =>
+      items.filter((i) => i.type === t).map(pick).filter((x): x is string => !!x);
+    const sel = { id: true, authorId: true, visibility: true } as const;
+    const [aw, qw, dw] = (await Promise.all([
+      this.access.listWhere(user, ContentType.ARTICLE),
+      this.access.listWhere(user, ContentType.QUIZ),
+      this.access.listWhere(user, ContentType.DECK),
+    ])) as ListWhere[];
+    const [articles, quizzes, decks] = await Promise.all([
+      this.prisma.article.findMany({ where: { AND: [aw, { id: { in: ids(CourseItemType.ARTICLE, (i) => i.articleId) } }] }, select: sel }),
+      this.prisma.quiz.findMany({ where: { AND: [qw, { id: { in: ids(CourseItemType.QUIZ, (i) => i.quizId) } }] }, select: sel }),
+      this.prisma.flashcardDeck.findMany({ where: { AND: [dw, { id: { in: ids(CourseItemType.DECK, (i) => i.deckId) } }] }, select: sel }),
+    ]);
+    const [la, lq, ld] = await Promise.all([
+      this.content.lockedIds(user, ContentType.ARTICLE, articles),
+      this.content.lockedIds(user, ContentType.QUIZ, quizzes),
+      this.content.lockedIds(user, ContentType.DECK, decks),
+    ]);
+    const okA = new Set(articles.map((a) => a.id));
+    const okQ = new Set(quizzes.map((q) => q.id));
+    const okD = new Set(decks.map((d) => d.id));
+    const available = new Set<string>();
+    const locked = new Set<string>();
+    for (const i of items) {
+      const ref = i.articleId ?? i.quizId ?? i.deckId ?? '';
+      const [ok, lk] =
+        i.type === CourseItemType.ARTICLE ? [okA, la] : i.type === CourseItemType.QUIZ ? [okQ, lq] : [okD, ld];
+      if (ok.has(ref)) available.add(i.id);
+      if (lk.has(ref)) locked.add(i.id);
+    }
+    return { available, locked };
   }
 
   // ───────────── writes ─────────────
