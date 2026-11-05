@@ -1,0 +1,661 @@
+// Eduventure 2.0 — Prisma schema (single source: docs/SPEC.md §2)
+// Owned by API-CORE. API-CONTENT: ask before changing, keep edits additive.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Enums ─────────────────────────────
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum Visibility {
+  PUBLIC
+  PRIVATE
+  GROUPS
+  PASSCODE
+}
+
+enum QuestionType {
+  SINGLE
+  MULTIPLE
+  TEXT
+  TRUE_FALSE
+  ORDERING
+  FILL_BLANKS
+  OPEN
+}
+
+enum AttemptMode {
+  EXAM
+  PRACTICE
+}
+
+enum AttemptStatus {
+  IN_PROGRESS
+  SUBMITTED
+  PENDING_REVIEW
+  GRADED
+}
+
+enum ContentType {
+  QUIZ
+  ARTICLE
+  COURSE
+  PATH
+  DECK
+}
+
+enum CommentTarget {
+  ARTICLE
+  ATTEMPT
+  GROUP
+  COURSE
+}
+
+enum CourseItemType {
+  ARTICLE
+  QUIZ
+  DECK
+}
+
+enum QuestType {
+  COMPLETE_QUIZZES
+  READ_ARTICLES
+  STUDY_CARDS
+  PERFECT_SCORE
+  EARN_XP
+}
+
+enum QuestPeriod {
+  DAILY
+  WEEKLY
+  ONCE
+}
+
+// ───────────────────────────── Users ─────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  avatarUrl    String?
+  bio          String?
+  role         Role      @default(STUDENT)
+  xp           Int       @default(0)
+  level        Int       @default(1)
+  streak       Int       @default(0)
+  lastActiveAt DateTime?
+  tokenVersion Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  quizzes             Quiz[]              @relation("QuizAuthor")
+  bankQuestions       BankQuestion[]      @relation("BankAuthor")
+  attempts            Attempt[]
+  articles            Article[]           @relation("ArticleAuthor")
+  articleProgress     ArticleProgress[]
+  annotations         Annotation[]
+  courses             Course[]            @relation("CourseAuthor")
+  courseCompletions   CourseCompletion[]
+  paths               LearningPath[]      @relation("PathAuthor")
+  decks               FlashcardDeck[]     @relation("DeckAuthor")
+  flashcardReviews    FlashcardReview[]
+  teachingGroups      Group[]             @relation("GroupTeacher")
+  memberships         GroupMember[]
+  assignments         Assignment[]        @relation("AssignmentUser")
+  assignmentsCreated  Assignment[]        @relation("AssignmentAssignedBy")
+  notifications       Notification[]
+  comments            Comment[]
+  bookmarks           Bookmark[]
+  achievements        UserAchievement[]
+  quests              UserQuest[]
+  xpEvents            XpEvent[]
+
+  @@index([role])
+  @@index([xp])
+}
+
+// ───────────────────────────── Quizzes ─────────────────────────────
+
+model Quiz {
+  id               String        @id @default(cuid())
+  title            String
+  description      String?
+  category         String?
+  tags             String[]      @default([])
+  coverColor       String?
+  status           ContentStatus @default(DRAFT)
+  visibility       Visibility    @default(PUBLIC)
+  passcode         String?
+  timeLimitSec     Int?
+  passPercent      Int           @default(60)
+  shuffleQuestions Boolean       @default(false)
+  shuffleOptions   Boolean       @default(false)
+  showAnswers      Boolean       @default(true)
+  maxAttempts      Int?
+  authorId         String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  author       User          @relation("QuizAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  questions    Question[]
+  attempts     Attempt[]
+  articleLinks ArticleQuiz[]
+  courseItems  CourseItem[]
+
+  @@index([authorId])
+  @@index([status, visibility])
+  @@index([category])
+}
+
+model Question {
+  id          String       @id @default(cuid())
+  quizId      String
+  order       Int          @default(0)
+  type        QuestionType
+  text        String
+  imageUrl    String?
+  options     Json         @default("[]")
+  correct     Json?
+  explanation String?
+  points      Int          @default(1)
+  tags        String[]     @default([])
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId, order])
+}
+
+model BankQuestion {
+  id          String       @id @default(cuid())
+  type        QuestionType
+  text        String
+  imageUrl    String?
+  options     Json         @default("[]")
+  correct     Json?
+  explanation String?
+  points      Int          @default(1)
+  tags        String[]     @default([])
+  difficulty  Int          @default(1)
+  authorId    String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  author User @relation("BankAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([type])
+}
+
+model Attempt {
+  id            String        @id @default(cuid())
+  quizId        String
+  userId        String
+  mode          AttemptMode   @default(EXAM)
+  status        AttemptStatus @default(IN_PROGRESS)
+  answers       Json          @default("{}")
+  questionOrder String[]      @default([])
+  result        Json?
+  score         Float         @default(0)
+  maxScore      Float         @default(0)
+  percent       Float         @default(0)
+  passed        Boolean       @default(false)
+  timeSpentSec  Int           @default(0)
+  feedback      String?
+  startedAt     DateTime      @default(now())
+  submittedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, submittedAt])
+  @@index([quizId, status])
+  @@index([status])
+}
+
+// ───────────────────────────── Articles ─────────────────────────────
+
+model Article {
+  id             String        @id @default(cuid())
+  title          String
+  slug           String        @unique
+  excerpt        String?
+  content        String
+  coverUrl       String?
+  category       String?
+  tags           String[]      @default([])
+  readingMinutes Int           @default(1)
+  status         ContentStatus @default(DRAFT)
+  visibility     Visibility    @default(PUBLIC)
+  passcode       String?
+  authorId       String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  author         User              @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  relatedQuizzes ArticleQuiz[]
+  progress       ArticleProgress[]
+  annotations    Annotation[]
+  courseItems    CourseItem[]
+
+  @@index([authorId])
+  @@index([status, visibility])
+  @@index([category])
+}
+
+model ArticleQuiz {
+  articleId String
+  quizId    String
+
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  quiz    Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, quizId])
+  @@index([quizId])
+}
+
+model ArticleProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  articleId   String
+  progress    Int       @default(0)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, articleId])
+  @@index([articleId])
+}
+
+model Annotation {
+  id          String   @id @default(cuid())
+  userId      String
+  articleId   String
+  quote       String
+  note        String?
+  color       String   @default("signal")
+  startOffset Int
+  endOffset   Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([userId, articleId])
+}
+
+// ───────────────────────────── Courses & paths ─────────────────────────────
+
+model Course {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  coverUrl    String?
+  category    String?
+  level       String?
+  status      ContentStatus @default(DRAFT)
+  visibility  Visibility    @default(PUBLIC)
+  passcode    String?
+  authorId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  author      User               @relation("CourseAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  items       CourseItem[]
+  completions CourseCompletion[]
+  pathItems   PathItem[]
+
+  @@index([authorId])
+  @@index([status, visibility])
+}
+
+model CourseItem {
+  id        String         @id @default(cuid())
+  courseId  String
+  order     Int            @default(0)
+  type      CourseItemType
+  articleId String?
+  quizId    String?
+  deckId    String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  course  Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  article Article?       @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  quiz    Quiz?          @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  deck    FlashcardDeck? @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, order])
+  @@index([articleId])
+  @@index([quizId])
+  @@index([deckId])
+}
+
+model CourseCompletion {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  completedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([courseId])
+}
+
+model LearningPath {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  coverUrl    String?
+  status      ContentStatus @default(DRAFT)
+  visibility  Visibility    @default(PUBLIC)
+  passcode    String?
+  authorId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  author User       @relation("PathAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  items  PathItem[]
+
+  @@index([authorId])
+  @@index([status, visibility])
+}
+
+model PathItem {
+  id        String   @id @default(cuid())
+  pathId    String
+  order     Int      @default(0)
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  path   LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+  course Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([pathId, order])
+  @@index([courseId])
+}
+
+// ───────────────────────────── Flashcards ─────────────────────────────
+
+model FlashcardDeck {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  category    String?
+  status      ContentStatus @default(DRAFT)
+  visibility  Visibility    @default(PUBLIC)
+  passcode    String?
+  authorId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  author      User         @relation("DeckAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  cards       Flashcard[]
+  courseItems CourseItem[]
+
+  @@index([authorId])
+  @@index([status, visibility])
+}
+
+model Flashcard {
+  id        String   @id @default(cuid())
+  deckId    String
+  order     Int      @default(0)
+  front     String
+  back      String
+  example   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deck    FlashcardDeck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  reviews FlashcardReview[]
+
+  @@index([deckId, order])
+}
+
+model FlashcardReview {
+  id          String   @id @default(cuid())
+  userId      String
+  cardId      String
+  ease        Float    @default(2.5)
+  interval    Int      @default(0)
+  repetitions Int      @default(0)
+  dueAt       DateTime @default(now())
+  lastGrade   Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card Flashcard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cardId])
+  @@index([userId, dueAt])
+  @@index([cardId])
+}
+
+// ───────────────────────────── Groups & assignments ─────────────────────────────
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  color       String?
+  teacherId   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teacher       User            @relation("GroupTeacher", fields: [teacherId], references: [id], onDelete: Cascade)
+  members       GroupMember[]
+  contentAccess ContentAccess[]
+  assignments   Assignment[]
+
+  @@index([teacherId])
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  groupId  String
+  userId   String
+  joinedAt DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
+  @@index([userId])
+}
+
+/// Which groups can see a piece of content whose visibility = GROUPS.
+model ContentAccess {
+  id          String      @id @default(cuid())
+  contentType ContentType
+  contentId   String
+  groupId     String
+  createdAt   DateTime    @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([contentType, contentId, groupId])
+  @@index([groupId])
+}
+
+model Assignment {
+  id           String      @id @default(cuid())
+  contentType  ContentType
+  contentId    String
+  title        String
+  groupId      String?
+  userId       String?
+  dueAt        DateTime?
+  assignedById String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  group      Group? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user       User?  @relation("AssignmentUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedBy User   @relation("AssignmentAssignedBy", fields: [assignedById], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+  @@index([userId])
+  @@index([contentType, contentId])
+}
+
+// ───────────────────────────── Social ─────────────────────────────
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+}
+
+model Comment {
+  id         String        @id @default(cuid())
+  userId     String
+  targetType CommentTarget
+  targetId   String
+  parentId   String?
+  body       String
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([targetType, targetId])
+  @@index([parentId])
+}
+
+model Bookmark {
+  id          String      @id @default(cuid())
+  userId      String
+  contentType ContentType
+  contentId   String
+  createdAt   DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentType, contentId])
+  @@index([contentType, contentId])
+}
+
+// ───────────────────────────── Gamification ─────────────────────────────
+
+/// rule examples: {"type":"quizzes","count":10} · {"type":"perfect","count":1} · {"type":"streak","days":7}
+/// {"type":"xp","amount":1000} · {"type":"level","level":5} · {"type":"articles","count":5}
+/// {"type":"courses","count":1} · {"type":"cards","count":100}
+model Achievement {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  title       String
+  description String
+  icon        String   @default("Award")
+  xpReward    Int      @default(0)
+  rule        Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users UserAchievement[]
+}
+
+model UserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([achievementId])
+}
+
+model Quest {
+  id          String      @id @default(cuid())
+  title       String
+  description String?
+  type        QuestType
+  target      Int         @default(1)
+  xpReward    Int         @default(10)
+  period      QuestPeriod @default(DAILY)
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  progress UserQuest[]
+
+  @@index([active])
+}
+
+model UserQuest {
+  id          String    @id @default(cuid())
+  userId      String
+  questId     String
+  periodKey   String
+  progress    Int       @default(0)
+  completedAt DateTime?
+  claimedAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quest Quest @relation(fields: [questId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questId, periodKey])
+  @@index([questId])
+}
+
+model XpEvent {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([createdAt])
+}
