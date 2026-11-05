@@ -221,7 +221,7 @@ export class ArticlesService {
         readingMinutes: readingMinutes(content),
         status: dto.status,
         visibility,
-        passcode: visibility === Visibility.PASSCODE ? dto.passcode?.trim() || null : dto.passcode?.trim() || null,
+        passcode: dto.passcode?.trim() || null,
         authorId: user.id,
         relatedQuizzes: quizIds?.length ? { create: quizIds.map((quizId) => ({ quizId })) } : undefined,
       },
