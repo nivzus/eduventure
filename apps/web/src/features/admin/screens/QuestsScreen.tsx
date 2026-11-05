@@ -265,7 +265,7 @@ function AchievementsGrid({ onEdit }: { onEdit: (a: AdminAchievement) => void })
                 <span className="grid size-14 shrink-0 place-items-center rounded-full border-2 border-ink bg-signal text-signal-fg shadow-stamp-sm">
                   <Icon className="size-6" />
                 </span>
-                <div className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1 pr-14">
                   <p className="font-display text-lg font-bold leading-tight">{a.title}</p>
                   <p className="text-sm text-muted">{a.description}</p>
                   <p className="mt-1 font-mono text-[11px] text-subtle">{a.code}</p>

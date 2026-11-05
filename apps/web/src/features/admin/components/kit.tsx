@@ -16,12 +16,12 @@ import { AZ_MONTHS, AZ_MONTHS_SHORT, cn } from '@/lib/utils';
 const STAFF: Role[] = ['TEACHER', 'ADMIN'];
 const ADMIN: Role[] = ['ADMIN'];
 
-const NAV: { href: string; label: string; icon: typeof Users; roles: Role[]; exact?: boolean }[] = [
+const NAV: { href: string; label: string; icon: typeof Users; roles: Role[]; exact?: boolean; also?: string[] }[] = [
   { href: '/admin', label: 'Ümumi', icon: LayoutDashboard, roles: STAFF, exact: true },
   { href: '/admin/analytics', label: 'Analitika', icon: BarChart3, roles: STAFF },
   { href: '/admin/groups', label: 'Qruplar', icon: Users, roles: STAFF },
   { href: '/admin/users', label: 'İstifadəçilər', icon: UsersRound, roles: ADMIN },
-  { href: '/admin/quests', label: 'Kvestlər', icon: Swords, roles: ADMIN },
+  { href: '/admin/quests', label: 'Kvestlər', icon: Swords, roles: ADMIN, also: ['/admin/achievements'] },
   { href: '/admin/permissions', label: 'İcazələr', icon: KeyRound, roles: ADMIN },
 ];
 
@@ -34,7 +34,9 @@ export function AdminNav() {
     <nav aria-label="Admin bölmələri" className="-mx-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
       <ul className="flex w-max gap-2">
         {items.map((n) => {
-          const active = n.exact ? pathname === n.href : pathname === n.href || pathname.startsWith(`${n.href}/`);
+          const active = n.exact
+            ? pathname === n.href
+            : [n.href, ...(n.also ?? [])].some((h) => pathname === h || pathname.startsWith(`${h}/`));
           const Icon = n.icon;
           return (
             <li key={n.href}>
@@ -62,6 +64,7 @@ export function AdminNav() {
 export function AdminPage({
   note,
   title,
+  titleAdornment,
   subtitle,
   actions,
   roles = STAFF,
@@ -69,7 +72,9 @@ export function AdminPage({
   children,
 }: {
   note?: ReactNode;
-  title: ReactNode;
+  title: string;
+  /** rendered before the title (e.g. a group colour swatch) */
+  titleAdornment?: ReactNode;
   subtitle?: ReactNode;
   actions?: ReactNode;
   roles?: Role[];
@@ -88,10 +93,9 @@ export function AdminPage({
         <header className="mt-5 flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
             {note && <Note className="text-2xl !text-signal">{note}</Note>}
-            <h1 className="mt-1 break-words text-4xl sm:text-5xl">
-              <Highlight inView={false} delay={0.25}>
-                {title}
-              </Highlight>
+            <h1 className="mt-1 break-words text-[2rem] leading-tight sm:text-5xl">
+              {titleAdornment}
+              <MarkedTitle text={title} />
             </h1>
             {subtitle && <p className="hand mt-2 text-xl text-muted sm:text-2xl">{subtitle}</p>}
           </div>
@@ -100,6 +104,27 @@ export function AdminPage({
         <div className="mt-8">{children}</div>
       </div>
     </RequireRole>
+  );
+}
+
+/** Highlights the whole title when short, otherwise only its last word (Highlight never wraps). */
+function MarkedTitle({ text }: { text: string }) {
+  const words = text.trim().split(/\s+/);
+  if (text.length <= 14 || words.length < 2) {
+    return (
+      <Highlight inView={false} delay={0.25}>
+        {text}
+      </Highlight>
+    );
+  }
+  const last = words.pop();
+  return (
+    <>
+      {words.join(' ')}{' '}
+      <Highlight inView={false} delay={0.25}>
+        {last}
+      </Highlight>
+    </>
   );
 }
 

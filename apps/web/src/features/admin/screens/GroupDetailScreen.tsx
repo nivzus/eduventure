@@ -52,12 +52,8 @@ export function GroupDetailScreen({ id }: { id: string }) {
     <AdminPage
       back={{ href: '/admin/groups', label: 'Qruplar' }}
       note={g?.teacher ? `müəllim: ${g.teacher.name}` : 'qrup'}
-      title={
-        <span className="inline-flex items-center gap-3">
-          {g && <span aria-hidden className="inline-block size-5 shrink-0 rounded-md border-2 border-ink" style={{ background: g.color ?? 'var(--signal)' }} />}
-          {g?.name ?? 'Yüklənir…'}
-        </span>
-      }
+      title={g?.name ?? 'Yüklənir…'}
+      titleAdornment={g && <span aria-hidden className="mr-3 inline-block size-5 rounded-md border-2 border-ink align-middle" style={{ background: g.color ?? 'var(--signal)' }} />}
       subtitle={g?.description ?? undefined}
       actions={
         <>
@@ -90,7 +86,7 @@ export function GroupDetailScreen({ id }: { id: string }) {
         />
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <Sheet
           title="Üzvlər"
           note="nəticələri ilə birlikdə"
@@ -105,11 +101,10 @@ export function GroupDetailScreen({ id }: { id: string }) {
           ) : !members.length ? (
             <EmptyNote message="Qrup boşdur" hint="“Üzv əlavə et” ilə tələbələri seçin." />
           ) : (
-            <Table wrapperClassName="rounded-2xl border-2 border-ink shadow-none" className="min-w-[560px]">
+            <Table wrapperClassName="rounded-2xl border-2 border-ink shadow-none" className="min-w-[440px]">
               <THead>
                 <TR>
                   <TH>Tələbə</TH>
-                  <TH className="text-right">XP</TH>
                   <TH className="text-right">Cəhd</TH>
                   <TH>Orta</TH>
                   <TH className="w-10">
@@ -127,16 +122,19 @@ export function GroupDetailScreen({ id }: { id: string }) {
                           <Avatar name={m.user.name} src={m.user.avatarUrl} size="sm" />
                           <span className="min-w-0">
                             <span className="block truncate font-semibold">{m.user.name}</span>
-                            {m.joinedAt && <span className="block text-xs text-subtle">qoşulub {formatRelative(m.joinedAt)}</span>}
+                            <span className="block text-xs text-subtle">
+                              {m.user.xp != null ? `${formatNumber(m.user.xp)} XP` : ''}
+                              {m.user.xp != null && m.joinedAt ? ' · ' : ''}
+                              {m.joinedAt ? `qoşulub ${formatRelative(m.joinedAt)}` : ''}
+                            </span>
                           </span>
                         </Link>
                       </TD>
-                      <TD className="text-right font-mono tabular">{m.user.xp != null ? formatNumber(m.user.xp) : '—'}</TD>
                       <TD className="text-right font-mono tabular">{p?.attempts ?? 0}</TD>
                       <TD>
                         <PctBar value={p?.avgPercent} />
                       </TD>
-                      <TD>
+                      <TD className="!pl-0">
                         <IconButton size="sm" label={`${m.user.name} qrupdan çıxar`} icon={<UserMinus />} className="hover:text-danger" onClick={() => setToRemove({ id: m.user.id, name: m.user.name })} />
                       </TD>
                     </TR>
@@ -210,7 +208,7 @@ export function GroupDetailScreen({ id }: { id: string }) {
       </div>
 
       {!!(stats.data?.quizzes.length || stats.data?.weakTopics.length) && (
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <Sheet title="Testlər üzrə" note="qrupun orta nəticəsi">
             <HBarList
               inked
