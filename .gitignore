@@ -18,7 +18,7 @@ next-env.d.ts
 .env.*.local
 
 # runtime
-uploads/
+/uploads/
 apps/api/uploads/
 *.log
 .DS_Store
