@@ -116,9 +116,10 @@ export function CommandPalette() {
 
   const commands = useMemo<Cmd[]>(() => {
     const nq = norm(q.trim());
-    const nav: Cmd[] = navForRole(user?.role).flatMap((g) =>
-      g.items.map((it) => ({ id: `nav:${it.href}`, group: 'Keçidlər', label: it.label, hint: g.label, icon: it.icon, run: go(it.href), _k: norm(`${it.label} ${g.label} ${it.keywords ?? ''}`) })),
-    ).filter((c) => !nq || (c as Cmd & { _k: string })._k.includes(nq));
+    const nav: Cmd[] = navForRole(user?.role)
+      .flatMap((g) => g.items.map((it) => ({ it, g, key: norm(`${it.label} ${g.label} ${it.keywords ?? ''}`) })))
+      .filter((x) => !nq || x.key.includes(nq))
+      .map(({ it, g }) => ({ id: `nav:${it.href}`, group: 'Keçidlər', label: it.label, hint: g.label, icon: it.icon, run: go(it.href) }));
 
     const r = search.data;
     const results: Cmd[] = [];

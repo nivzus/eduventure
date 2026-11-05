@@ -129,7 +129,7 @@ function OrderingRow({
       as="li"
       dragListener={false}
       dragControls={controls}
-      layout={reduce ? false : 'position'}
+      layout="position"
       whileDrag={{ scale: 1.02, boxShadow: '0 18px 40px -16px rgba(0,0,0,.55)', zIndex: 10 }}
       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
       tabIndex={disabled ? -1 : 0}
