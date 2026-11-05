@@ -55,8 +55,8 @@ export function seededShuffle<T>(items: readonly T[], seed: string): T[] {
 /* ------------------------------------------------------------------ */
 
 const TOKEN_COLORS: Record<string, string> = {
-  signal: '#E8FF59',
-  lime: '#E8FF59',
+  signal: '#FF8A1F',
+  lime: '#FF8A1F',
   ember: '#FF6B3D',
   orange: '#FF6B3D',
   aurora: '#9B7BFF',

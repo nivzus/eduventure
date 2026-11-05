@@ -4,6 +4,20 @@
 
 Источник правды по дизайну и API — [`docs/SPEC.md`](./SPEC.md), читать первым. Старый проект (CRA + Supabase) лежит в `legacy/`, главная логика в `legacy/src/App.js`.
 
+## ✅ Сделано во втором проходе (после 11:59)
+- **Фронтенд запускается.** Добавлены `app/layout.tsx` (шрифты, тема без мигания), `(app)/layout.tsx` (AppShell + MascotPeek), `(focus)/layout.tsx`, лендинг `/`, `/login`, `/register`, `not-found`, `error`. Добавлены страницы для готовых экранов: `/quizzes`, `/quizzes/[id]`, `/attempts/[id]`, `/articles`, `/articles/[slug]`. `next build` проходит (14 маршрутов).
+- **Бренд.** Лаймовый полностью заменён на оранжевый. Знак в логотипе — голова кота на оранжевой плашке (`components/shell/Logo.tsx`), `public/favicon.svg`. Маскот `components/brand/Mascot.tsx`: `Mascot` (peek/static/celebrate/sad, моргает, машет лапой, качает хвостом) и `MascotPeek` (выглядывает каждые 15–35 секунд, закрывается). Неиспользуемый логотип «E с компасом» удалён.
+- **Логотип владельца.** Это «кот с книгой», но в репозитории его нет ни в одной ветке и ни в одном коммите (включая `gh-pages`). Нужен файл от владельца. Когда он будет, положить в `apps/web/public/brand/` и заменить `LogoMark` в `components/shell/Logo.tsx` и `public/favicon.svg`.
+- **Бэкенд.** Модули users, quizzes, attempts, practice, bank, ai зарегистрированы. Написан `prisma/seed.ts`, сид прогнан.
+- **Smoke-тест** против живой БД: вход → старт теста → правильные ответы студенту не приходят → сдача. Все 7 типов вопросов проверены верно, OPEN уходит в PENDING_REVIEW, начисляется XP. `/me/summary`, leaderboard, achievements, quests, articles, courses, decks, paths, search, notifications отвечают 200.
+- **Баг.** Страница статьи падала с бесконечным циклом рендеров (`annotations = []` по умолчанию). Исправлено.
+- **Скриншоты** проверки лежат в `docs/screens/`.
+
+### Осталось после второго прохода
+- **Бэкенд:** модуль `stats` (`/stats/*` → 404), uploads.
+- **Дашборд:** в виджете «Altimetr» показывается «0 XP», а в шапке 99 XP — поля не совпадают с `/me/summary`.
+- **Фронтенд, экраны:** результат и разбор теста, `/practice`, курсы, пути, колоды и флэшкарты, закладки, поиск, профиль, уведомления, вся студия и админка (подробно см. список выше).
+
 ## Последние решения владельца (важно!)
 1. **Бренд остаётся оранжевым.** В `apps/web/src/app/globals.css` уже стоят новые токены: `--signal` = «рыжий котик» `#ff8a1f` (тёмная тема) / `#f57c1f` (светлая), `--ember` = янтарный `#ffb547` / жжёный оранжевый `#c2410c`. Прежний лаймовый `#e8ff59` отменён, но ещё **захардкожен** в файлах:
    `components/ui/Avatar.tsx`, `components/brand/{tokens.ts,Logo.tsx}`, `components/motion/confetti.ts`, `app/globals.css` (комментарии и мелкие места), `features/quiz/lib/{utils.ts,constants.ts}`, `features/learn/components/articles/Annotations.tsx`, `features/learn/styles/reader.css`. Заменить на `var(--signal)` или оранжевые оттенки.

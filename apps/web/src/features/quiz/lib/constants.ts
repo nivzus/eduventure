@@ -72,7 +72,7 @@ export const OPTION_LETTERS = 'ABCDEFGHIJ'.split('');
 
 /** Expedition palette for quiz covers (works on ink and paper). */
 export const COVER_PALETTE = [
-  '#E8FF59', // headlamp lime
+  '#FF8A1F', // brand cat orange
   '#FF6B3D', // ember
   '#9B7BFF', // aurora
   '#7CE7FF', // glacier

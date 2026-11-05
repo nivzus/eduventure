@@ -9,6 +9,12 @@ import { AuthModule } from './modules/auth/auth.module';
 import { GamificationModule } from './modules/gamification/gamification.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 // ── API-CONTENT modules: add imports below this line ──
+import { UsersModule } from './modules/users/users.module';
+import { QuizzesModule } from './modules/quizzes/quizzes.module';
+import { AttemptsModule } from './modules/attempts/attempts.module';
+import { PracticeModule } from './modules/practice/practice.module';
+import { BankModule } from './modules/bank/bank.module';
+import { AiModule } from './modules/ai/ai.module';
 import { ArticlesModule } from './modules/articles/articles.module';
 import { AssignmentsModule } from './modules/assignments/assignments.module';
 import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
@@ -28,6 +34,12 @@ import { SearchModule } from './modules/search/search.module';
     GamificationModule,
     AuthModule,
     // ── API-CORE modules ──
+    UsersModule,
+    QuizzesModule,
+    AttemptsModule,
+    PracticeModule,
+    BankModule,
+    AiModule,
     // ── API-CONTENT modules ──
     ContentModule,
     ArticlesModule,

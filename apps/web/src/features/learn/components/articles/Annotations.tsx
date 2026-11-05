@@ -47,13 +47,13 @@ function anchorOf(range: Range, wrap: HTMLElement): Anchor {
 }
 
 const swatch: Record<HighlightColor, string> = {
-  signal: 'bg-[#E8FF59]',
+  signal: 'bg-[#FF8A1F]',
   ember: 'bg-[#FF6B3D]',
   aurora: 'bg-[#9B7BFF]',
   glacier: 'bg-[#7CE7FF]',
 };
 export const swatchBar: Record<HighlightColor, string> = {
-  signal: 'bg-[#E8FF59]',
+  signal: 'bg-[#FF8A1F]',
   ember: 'bg-[#FF6B3D]',
   aurora: 'bg-[#9B7BFF]',
   glacier: 'bg-[#7CE7FF]',

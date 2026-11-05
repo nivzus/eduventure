@@ -344,7 +344,7 @@
 
 /* ── Annotation highlights (CSS Custom Highlight API) ── */
 ::highlight(ev-signal) {
-  background-color: color-mix(in oklab, #e8ff59 38%, transparent);
+  background-color: color-mix(in oklab, #FF8A1F 38%, transparent);
 }
 ::highlight(ev-ember) {
   background-color: color-mix(in oklab, #ff6b3d 34%, transparent);
@@ -365,7 +365,7 @@
   background-color: color-mix(in oklab, #f4f1ea 30%, transparent);
 }
 [data-theme='light'] ::highlight(ev-signal) {
-  background-color: color-mix(in oklab, #e8ff59 85%, transparent);
+  background-color: color-mix(in oklab, #FF8A1F 85%, transparent);
 }
 
 /* Print: clean article only */

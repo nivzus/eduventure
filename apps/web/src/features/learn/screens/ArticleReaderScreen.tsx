@@ -22,9 +22,11 @@ import { learnKeys, useAnnotations, useArticle } from '../hooks';
 import { longDate } from '../lib/format';
 import { isArticleDone, progressOf, questionCountOf, relatedQuizzesOf } from '../lib/normalize';
 import { toneOf } from '../lib/topo';
-import type { Article } from '../types';
+import type { Annotation, Article } from '../types';
 
 const EASE = [0.22, 1, 0.36, 1] as const;
+
+const NO_ANNOTATIONS: Annotation[] = [];
 
 export function ArticleReaderScreen({ slug }: { slug: string }) {
   const qc = useQueryClient();
@@ -79,7 +81,8 @@ function Reader({ article }: { article: Article }) {
     initialProgress: progressOf(article),
     initiallyCompleted: isArticleDone(article),
   });
-  const { data: annotations = [] } = useAnnotations(article.id);
+  const { data: annotationsData } = useAnnotations(article.id);
+  const annotations = annotationsData ?? NO_ANNOTATIONS;
   const engine = useAnnotationEngine({ articleId: article.id, bodyRef, wrapRef, annotations, contentKey });
   const toc = useToc(bodyRef, contentKey);
   const active = useActiveHeading(toc);

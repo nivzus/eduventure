@@ -2,8 +2,8 @@
 
 import confetti from 'canvas-confetti';
 
-const COLORS_DARK = ['#E8FF59', '#9B7BFF', '#FF6B3D', '#7CE7FF', '#F4F1EA'];
-const COLORS_LIGHT = ['#1A1A22', '#6B4BFF', '#E8542A', '#0A8FB5', '#E8FF59'];
+const COLORS_DARK = ['#FF8A1F', '#9B7BFF', '#FF6B3D', '#7CE7FF', '#F4F1EA'];
+const COLORS_LIGHT = ['#1A1A22', '#6B4BFF', '#E8542A', '#0A8FB5', '#FF8A1F'];
 
 function reduced() {
   return typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;

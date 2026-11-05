@@ -1,14 +1,21 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-/** Summit mark: two peaks, a contour, a flag. */
+/** Brand mark: the Eduventure cat on an orange tile (ears, eyes, whiskers, a tiny summit contour). */
 export function LogoMark({ className, animated }: { className?: string; animated?: boolean }) {
   return (
     <svg viewBox="0 0 32 32" fill="none" className={cn('size-8', className)} aria-hidden>
       <rect x="0.5" y="0.5" width="31" height="31" rx="10" className="fill-signal" />
-      <path d="M5 24.5 12.2 13l3.6 5.4L19.6 11 27 24.5" stroke="var(--signal-fg)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={animated ? '[stroke-dasharray:60] [animation:dash-in_1.4s_var(--ease-out-expo)_both]' : undefined} />
-      <path d="M19.6 11V5.5l4.2 1.7-4.2 1.7" stroke="var(--signal-fg)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8.5 27.2c3-1.1 5.6-1.1 7.8 0 2.4 1.1 4.9 1.1 7.4 0" stroke="var(--signal-fg)" strokeOpacity=".45" strokeWidth="1.3" strokeLinecap="round" />
+      <path
+        d="M7 24.6c0-5.6 1.3-8.9 2.5-10.6L8.6 6.4l5.2 3.5a12 12 0 0 1 4.4 0l5.2-3.5-.9 7.6c1.2 1.7 2.5 5 2.5 10.6-5.6 2.6-12.4 2.6-18 0Z"
+        fill="var(--signal-fg)"
+        className={animated ? 'origin-center [animation:float_3s_ease-in-out_infinite]' : undefined}
+      />
+      <ellipse cx="12.6" cy="17.4" rx="1.35" ry="1.8" className="fill-signal" />
+      <ellipse cx="19.4" cy="17.4" rx="1.35" ry="1.8" className="fill-signal" />
+      <path d="M15.1 20.5h1.8l-.9 1z" className="fill-signal" />
+      <path d="M3.6 19.6l4.4.7M3.6 22.4l4.4-.5M28.4 19.6l-4.4.7M28.4 22.4l-4.4-.5" stroke="var(--signal-fg)" strokeWidth="1.1" strokeLinecap="round" />
+      <path d="M10.5 25.2c1.8-.9 3.6-.9 5.5 0 1.9.9 3.7.9 5.5 0" className="stroke-signal" strokeOpacity=".7" strokeWidth="1" strokeLinecap="round" />
     </svg>
   );
 }

@@ -32,7 +32,7 @@
 
   --topo: rgba(244, 241, 234, 0.09);
   --topo-strong: rgba(244, 241, 234, 0.18);
-  --glow: 0 0 0 1px rgba(232, 255, 89, 0.35), 0 10px 40px -10px rgba(232, 255, 89, 0.45);
+  --glow: 0 0 0 1px rgba(255, 138, 31, 0.35), 0 10px 40px -10px rgba(255, 138, 31, 0.45);
   --inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
   --shadow-pop: 0 24px 60px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
   --grain-opacity: 0.045;

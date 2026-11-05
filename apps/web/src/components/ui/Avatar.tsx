@@ -2,11 +2,11 @@ import { cn, hashString, initials } from '@/lib/utils';
 
 const GRADIENTS = [
   ['#9B7BFF', '#7CE7FF'],
-  ['#FF6B3D', '#E8FF59'],
+  ['#FF6B3D', '#FF8A1F'],
   ['#4ADE80', '#7CE7FF'],
-  ['#E8FF59', '#4ADE80'],
+  ['#FF8A1F', '#4ADE80'],
   ['#FF4D6D', '#9B7BFF'],
-  ['#7CE7FF', '#E8FF59'],
+  ['#7CE7FF', '#FF8A1F'],
   ['#FF6B3D', '#9B7BFF'],
 ];
 
