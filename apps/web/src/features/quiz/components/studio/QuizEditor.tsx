@@ -342,7 +342,7 @@ export function QuizEditor({ id }: { id: string }) {
 
       <div className="mt-8 grid items-start gap-6 lg:grid-cols-[22rem_1fr]">
         {/* Settings */}
-        <Sheet className="lg:sticky lg:top-20" >
+        <Sheet>
           <div id="quiz-settings" className="scroll-mt-24" />
           <Tape className="-top-3 left-8" color="aurora" />
           <h2 className="font-display text-xl font-bold">Parametrlər</h2>
