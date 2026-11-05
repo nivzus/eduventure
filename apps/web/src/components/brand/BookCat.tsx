@@ -113,10 +113,10 @@ export function OfficialWordmark({ className, color = LOGO_ORANGE }: { className
 
 /**
  * Standalone cat outline: head, ears, nose, chest and paws follow the official logo exactly;
- * the back (hidden behind the book spine in the logo) is completed with a tangent-matched curve.
+ * the back (hidden behind the book spine in the logo) is one round convex arc from the shoulder to the haunch.
  */
 const CAT_PATH =
-  'M79.2 79.2 C80.4 77.1 83.6 75.4 86.4 74.5 C88.8 73.6 91.6 73.4 91.7 69.1 C91.7 64.4 90.8 61 96.6 56.6 C97 54.6 99.9 50.8 101.1 50.4 L102.1 56.1 C102.9 56.4 105.3 56.4 107 59.4 C107.6 61.4 109.1 62.9 109.9 63.4 C110.9 63.6 110.9 65.6 109.4 67.1 C107.6 69.1 104.4 69.6 104.2 70.9 C104.1 73.4 105.3 75.9 105.3 79.4 C105.3 86.1 102.6 88.3 103.2 91.9 C103.6 95 103.3 99.4 104.6 101.4 C105.7 103 108.2 103.5 108.6 105.6 C108.9 107.2 108 107.9 106.6 107.9 L101.6 107.9 C100.2 107.9 99.3 106.9 98.8 105.6 C98.2 107 97 108.1 95 108.2 L79 108.2 C70.5 108.3 65.2 105.2 64.6 98.5 C64.1 93.1 69.5 88.9 73.4 85.9 C75.6 84.2 77.9 81.6 79.2 79.2 Z';
+  'M86.4 74.5 C88.8 73.6 91.6 73.4 91.7 69.1 C91.7 64.4 90.8 61 96.6 56.6 C97 54.6 99.9 50.8 101.1 50.4 L102.1 56.1 C102.9 56.4 105.3 56.4 107 59.4 C107.6 61.4 109.1 62.9 109.9 63.4 C110.9 63.6 110.9 65.6 109.4 67.1 C107.6 69.1 104.4 69.6 104.2 70.9 C104.1 73.4 105.3 75.9 105.3 79.4 C105.3 86.1 102.6 88.3 103.2 91.9 C103.6 95 103.3 99.4 104.6 101.4 C105.7 103 108.2 103.5 108.6 105.6 C108.9 107.2 108 107.9 106.6 107.9 L101.6 107.9 C100.2 107.9 99.3 106.9 98.8 105.6 C98.2 107 97 108.1 95 108.2 L79 108.2 C70 108.4 63.6 104.6 62.8 97 C62 88.5 69 80 76.5 76.6 C79.6 75.2 83.2 74.6 86.4 74.5 Z';
 
 export type CatFace = 'none' | 'happy' | 'joy' | 'sad';
 
@@ -127,7 +127,7 @@ export type CatFace = 'none' | 'happy' | 'joy' | 'sad';
 export function LogoCat({ className, face = 'none', blink = false }: { className?: string; face?: CatFace; blink?: boolean }) {
   const reduce = useReducedMotion();
   return (
-    <svg viewBox="60 46 52 64" className={cn('block', className)} aria-hidden>
+    <svg viewBox="58 46 54 64" className={cn('block', className)} aria-hidden>
       <path d={CAT_PATH} fill={LOGO_ORANGE} />
       <path d={OFFICIAL.tail} fill={LOGO_PAGE} />
 

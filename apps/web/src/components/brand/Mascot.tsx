@@ -33,7 +33,7 @@ export interface MascotProps {
 export function Mascot({ mode = 'static', size = 140, message, className }: MascotProps) {
   const reduce = useReducedMotion();
   const h = size;
-  const w = (size * 52) / 64;
+  const w = (size * 54) / 64;
   const face = mode === 'celebrate' ? 'joy' : mode === 'sad' ? 'sad' : 'happy';
 
   const body =
