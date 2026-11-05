@@ -1,6 +1,7 @@
 import { hashString } from '@/lib/utils';
 import { COVER_PALETTE, OPTION_LETTERS } from './constants';
 
+export { errorMessage } from '@/lib/api';
 export {
   formatClock,
   formatDate,
@@ -401,15 +402,6 @@ export function percentTone(p: number | null | undefined): 'moss' | 'ember' | 'd
   if (p >= 75) return 'moss';
   if (p >= 50) return 'ember';
   return 'danger';
-}
-
-export function errorMessage(err: unknown, fallback = 'Xəta baş verdi'): string {
-  if (!err) return fallback;
-  if (typeof err === 'string') return err;
-  const e = err as { message?: unknown };
-  if (Array.isArray(e.message)) return e.message.join(', ');
-  if (typeof e.message === 'string' && e.message) return e.message;
-  return fallback;
 }
 
 export function errorStatus(err: unknown): number | undefined {
