@@ -1,0 +1,24 @@
+# Local development database only (the API and web run on your machine with `npm run dev`).
+# Matches DATABASE_URL in apps/api/.env.example.
+#   npm run db:up      → start Postgres on localhost:5432
+#   docker compose down → stop (data is kept in the pgdata volume)
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: eduventure
+      POSTGRES_PASSWORD: eduventure
+      POSTGRES_DB: eduventure
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eduventure -d eduventure"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  pgdata:

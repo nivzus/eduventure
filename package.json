@@ -8,7 +8,7 @@
     "install:all": "npm --prefix apps/api install && npm --prefix apps/web install",
     "dev:api": "npm --prefix apps/api run start:dev",
     "dev:web": "npm --prefix apps/web run dev",
-    "dev": "npx concurrently -n api,web -c magenta,yellow \"npm run dev:api\" \"npm run dev:web\"",
+    "dev": "npx --yes concurrently -n api,web -c magenta,yellow \"npm run dev:api\" \"npm run dev:web\"",
     "build": "npm --prefix apps/api run build && npm --prefix apps/web run build",
     "db:migrate": "npm --prefix apps/api exec prisma migrate dev",
     "db:seed": "npm --prefix apps/api exec prisma db seed"
