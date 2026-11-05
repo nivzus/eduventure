@@ -38,12 +38,10 @@ export function questionCountOf(q: QuizLite): number | undefined {
 
 /** Course progress 0..1 */
 export function courseProgress(c: Course): number {
-  if (c.items && c.items.length) {
-    const done = c.items.filter((i) => i.done).length;
-    return done / c.items.length;
-  }
-  const p = c.progress ?? 0;
-  return p > 1 ? p / 100 : p;
+  if (c.completed || c.completedAt) return 1;
+  if (typeof c.progress === 'number') return c.progress > 1 ? c.progress / 100 : c.progress;
+  if (c.items && c.items.length) return c.items.filter((i) => i.done).length / c.items.length;
+  return 0;
 }
 
 export function courseItemCount(c: Course): number {
@@ -81,10 +79,10 @@ export function pathCourseCount(p: LearningPath): number {
 
 /** Path progress 0..1 (average of course progress). */
 export function pathProgress(p: LearningPath): number {
+  if (typeof p.progress === 'number') return p.progress > 1 ? p.progress / 100 : p.progress;
   const cs = pathCourses(p);
-  if (cs.length) return cs.reduce((s, c) => s + (isCourseCompleted(c) ? 1 : courseProgress(c)), 0) / cs.length;
-  const v = p.progress ?? 0;
-  return v > 1 ? v / 100 : v;
+  if (cs.length) return cs.reduce((s, c) => s + courseProgress(c), 0) / cs.length;
+  return 0;
 }
 
 export function deckCardCount(d: Deck): number {

@@ -9,7 +9,6 @@ import type {
   ArticleInput,
   ArticleProgressResponse,
   Bookmark,
-  CardReviewState,
   CommentNode,
   ContentType,
   Course,
@@ -23,6 +22,7 @@ import type {
   LearningPath,
   PathInput,
   QuizLite,
+  ReviewResponse,
   SearchResults,
   StudySession,
   Visibility,
@@ -264,7 +264,7 @@ export function useStudySession(id: string | undefined) {
 export function useReviewCard() {
   return useMutation({
     mutationFn: ({ cardId, grade }: { cardId: string; grade: Grade }) =>
-      api.post<CardReviewState>(`/flashcards/${cardId}/review`, { grade }),
+      api.post<ReviewResponse>(`/flashcards/${cardId}/review`, { grade }),
   });
 }
 

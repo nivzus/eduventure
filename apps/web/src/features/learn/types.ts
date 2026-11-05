@@ -118,7 +118,11 @@ export interface ItemSummary {
   readingMinutes?: number;
   questionCount?: number;
   cardCount?: number;
+  timeLimitSec?: number | null;
+  passPercent?: number;
   category?: string | null;
+  coverUrl?: string | null;
+  status?: ContentStatus;
 }
 
 export interface CourseItem {
@@ -126,6 +130,7 @@ export interface CourseItem {
   courseId?: string;
   order: number;
   type: CourseItemType;
+  title?: string;
   articleId?: string | null;
   quizId?: string | null;
   deckId?: string | null;
@@ -142,19 +147,27 @@ export interface Course extends ContentBase {
   level?: string | null;
   items?: CourseItem[];
   itemCount?: number;
+  itemCounts?: Partial<Record<CourseItemType, number>>;
   _count?: { items?: number };
   /** 0..1 */
   progress?: number;
   completed?: boolean;
   completedAt?: string | null;
   doneCount?: number;
+  canComplete?: boolean;
+  paths?: { id: string; title: string }[];
+  order?: number;
 }
 
 export interface CourseCompleteResponse {
+  courseId?: string;
+  completed?: boolean;
   completedAt?: string;
   xpGained?: number;
+  levelUp?: boolean;
   alreadyCompleted?: boolean;
-  newAchievements?: { id: string; title: string }[];
+  newAchievements?: { id?: string; title?: string }[];
+  next?: { pathId: string; pathTitle: string; courseId: string; courseTitle: string } | null;
 }
 
 export interface CourseInput {
@@ -180,8 +193,12 @@ export interface LearningPath extends ContentBase {
   description?: string | null;
   coverUrl?: string | null;
   courses?: PathCourse[];
+  courseIds?: string[];
   items?: { id: string; order: number; courseId: string; course?: PathCourse }[];
   courseCount?: number;
+  completedCourses?: number;
+  completed?: boolean;
+  nextCourseId?: string | null;
   _count?: { items?: number };
   /** 0..1 */
   progress?: number;
@@ -225,8 +242,16 @@ export interface Deck extends ContentBase {
   cardCount?: number;
   dueCount?: number;
   newCount?: number;
-  learnedCount?: number;
+  reviewedCount?: number;
   _count?: { cards?: number };
+}
+
+export interface ReviewResponse extends CardReviewState {
+  id?: string;
+  cardId: string;
+  deckId?: string;
+  xpGained?: number;
+  levelUp?: boolean;
 }
 
 export interface StudyCard extends Flashcard {
@@ -248,7 +273,7 @@ export interface DeckInput {
   status: ContentStatus;
   visibility: Visibility;
   passcode?: string | null;
-  cards: { front: string; back: string; example?: string | null }[];
+  cards: { id?: string; front: string; back: string; example?: string | null }[];
   groupIds?: string[];
 }
 
