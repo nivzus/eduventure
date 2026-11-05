@@ -1,19 +1,14 @@
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import { BookCatMark, LOGO_ORANGE } from '@/components/brand/BookCat';
+import { BookCatMark, OfficialWordmark } from '@/components/brand/BookCat';
 
 /** Brand mark: the official open-book + cat logo (vector). */
 export function LogoMark({ className, animated }: { className?: string; animated?: boolean }) {
-  return <BookCatMark animated={animated} className={cn('size-9', className)} />;
+  return <BookCatMark animated={animated} className={cn('size-10', className)} />;
 }
 
 export function Wordmark({ className }: { className?: string }) {
-  return (
-    <span className={cn('flex flex-col font-brand uppercase leading-none', className)} style={{ color: LOGO_ORANGE }}>
-      <span className="text-[17px] font-bold tracking-[0.04em]">Eduventure</span>
-      <span className="mt-[3px] text-[9px] font-bold tracking-[0.26em] opacity-90">with Seda</span>
-    </span>
-  );
+  return <OfficialWordmark className={cn('h-[30px] w-auto', className)} />;
 }
 
 export function Logo({ href = '/', compact, className }: { href?: string; compact?: boolean; className?: string }) {
