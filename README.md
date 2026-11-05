@@ -193,7 +193,7 @@ Brauzerdə <http://localhost:3000> açın. API ayrıca: `npm run dev:api`, web a
 │       ├── src/lib/              api klienti, auth, tiplər, utils
 │       └── Dockerfile
 ├── docs/                         SPEC.md · ARCHITECTURE.md · DEPLOY.md
-├── .github/                      CI workflow + Dependabot
+├── .github/                      CI workflow
 ├── docker-compose.yml            dev: yalnız PostgreSQL
 ├── docker-compose.prod.yml       db + api + web
 └── package.json                  monorepo skriptləri

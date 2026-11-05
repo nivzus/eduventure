@@ -107,7 +107,7 @@
 - **Не написано:** `Mascot`, `MascotPeek`, иллюстрации (`EmptyTrail, SummitFlag, Compass, Basecamp, MapFolded, Lantern, CardsStack, PeakRange`), favicon, og-image, `public/brand/*`.
 
 ### DevOps и документация, готово примерно на 70%
-- ✅ `apps/api/Dockerfile` + `docker-entrypoint.sh`, `apps/web/Dockerfile`, `.dockerignore`, `docker-compose.prod.yml`, `.env.prod.example`, `.github/workflows/ci.yml`, `.github/dependabot.yml`.
+- ✅ `apps/api/Dockerfile` + `docker-entrypoint.sh`, `apps/web/Dockerfile`, `.dockerignore`, `docker-compose.prod.yml`, `.env.prod.example`, `.github/workflows/ci.yml` (Dependabot убран по решению владельца).
 - ✅ Новый `README.md` и `docs/ARCHITECTURE.md`. Агент остановился на README: **перечитать** и проверить, что он дописан до конца.
 - ❌ `docs/DEPLOY.md`. Для Docker-сборки web, вероятно, нужен `output: 'standalone'` в `apps/web/next.config.ts`: проверить по Dockerfile.
 
