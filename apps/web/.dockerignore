@@ -1,0 +1,18 @@
+# Build context: apps/web — keep it small and free of secrets
+node_modules
+.next
+out
+coverage
+.vercel
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+.git
+.vscode
+.idea
+.DS_Store
+.foundation-ready
+Dockerfile
+.dockerignore

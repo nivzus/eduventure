@@ -180,3 +180,6 @@ export interface VisibilityWhere {
   id?: { in: string[] };
   OR?: VisibilityWhere[];
 }
+
+/** Back-compat alias (structurally assignable to the Prisma where inputs of all content models). */
+export type ListWhere = VisibilityWhere;

@@ -13,7 +13,6 @@ import type {
   Group,
   LeaderboardEntry,
   LeaderboardPeriod,
-  MeSummary,
   NotificationItem,
   PublicProfile,
   QuestView,
@@ -39,12 +38,8 @@ export const ck = {
 
 /* ─────────── me / summary ─────────── */
 
-export function useMeSummary() {
-  return useQuery({
-    queryKey: ck.summary,
-    queryFn: () => api.get<MeSummary>('/me/summary'),
-  });
-}
+/** Shared with the shell (queryKey ['me','summary']) so XP/streak chips stay in sync. */
+export { useMeSummary } from '@/lib/hooks';
 
 /* ─────────── quests & achievements ─────────── */
 
