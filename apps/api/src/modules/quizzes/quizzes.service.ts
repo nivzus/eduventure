@@ -142,6 +142,11 @@ export class QuizzesService {
       ? await this.prisma.attempt.count({ where: { userId: user.id, quizId: id, mode: 'EXAM', status: { in: [...FINISHED_STATUSES] } } })
       : 0;
 
+    const groupIds =
+      canSeeAnswers && quiz.visibility === 'GROUPS'
+        ? (await this.prisma.contentAccess.findMany({ where: { contentType: 'QUIZ', contentId: id }, select: { groupId: true } })).map((r) => r.groupId)
+        : [];
+
     const locked = decision === 'LOCKED' && myAttempts === 0;
     const questions = locked
       ? []
@@ -155,6 +160,7 @@ export class QuizzesService {
       questions,
       questionCount: quiz.questions.length,
       totalPoints: quiz.questions.reduce((s, q) => s + q.points, 0),
+      groupIds,
       locked,
       myAttempts,
       myBest,

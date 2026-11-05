@@ -309,9 +309,10 @@ export class AttemptsService {
     });
   }
 
-  pendingReview() {
+  /** Teachers see attempts on their own quizzes; admins see everything. */
+  pendingReview(user: AuthUser) {
     return this.prisma.attempt.findMany({
-      where: { status: 'PENDING_REVIEW' },
+      where: { status: 'PENDING_REVIEW', ...(user.role === 'ADMIN' ? {} : { quiz: { authorId: user.id } }) },
       orderBy: { submittedAt: 'asc' },
       include: {
         quiz: { select: { id: true, title: true, category: true, authorId: true } },

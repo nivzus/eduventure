@@ -8,7 +8,7 @@ import { errorMessage } from '@/lib/api';
 import { formatPercent, formatRelative } from '@/lib/utils';
 import { useStatsOverview } from '../hooks';
 import { HBarList, TrailLine } from '../components/charts';
-import { AdminPage, dayLabelShort, DerivedTag, EmptyNote, Kpi, Sheet, SheetSkeleton } from '../components/kit';
+import { AdminPage, dayLabelLong, dayLabelShort, DerivedTag, EmptyNote, Kpi, Sheet, SheetSkeleton } from '../components/kit';
 
 export function OverviewScreen() {
   const { data, isLoading, error } = useStatsOverview();
@@ -40,7 +40,7 @@ export function OverviewScreen() {
               ) : days.length ? (
                 <TrailLine
                   ariaLabel="Gündəlik cəhdlərin sayı"
-                  data={days.map((d) => ({ key: d.date, label: dayLabelShort(d.date), value: d.count, title: new Date(d.date).toLocaleDateString('az-AZ', { day: 'numeric', month: 'long' }) }))}
+                  data={days.map((d) => ({ key: d.date, label: dayLabelShort(d.date), value: d.count, title: dayLabelLong(d.date) }))}
                   valueLabel={(v) => `${v} cəhd`}
                   height={250}
                 />

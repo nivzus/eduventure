@@ -28,8 +28,8 @@ export class AttemptsController {
 
   @Roles('TEACHER', 'ADMIN')
   @Get('attempts/pending-review')
-  pending() {
-    return this.attempts.pendingReview();
+  pending(@CurrentUser() user: AuthUser) {
+    return this.attempts.pendingReview(user);
   }
 
   @Get('attempts/:id')

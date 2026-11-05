@@ -11,7 +11,7 @@ import { Mascot } from '@/components/brand/Mascot';
 import { NumberTicker } from '@/components/motion';
 import { RequireRole, useAuth, hasRole } from '@/lib/auth';
 import type { Role } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { AZ_MONTHS, AZ_MONTHS_SHORT, cn } from '@/lib/utils';
 
 const STAFF: Role[] = ['TEACHER', 'ADMIN'];
 const ADMIN: Role[] = ['ADMIN'];
@@ -221,8 +221,19 @@ export function DerivedTag({ show }: { show?: boolean }) {
   );
 }
 
+/** 'YYYY-MM-DD' (or ISO) → local Date without UTC shift. */
+function parseDay(iso: string): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(iso);
+  return Number.isNaN(+d) ? null : d;
+}
+
 export const dayLabelShort = (iso: string) => {
-  const d = new Date(iso);
-  if (Number.isNaN(+d)) return iso;
-  return d.toLocaleDateString('az-AZ', { day: 'numeric', month: 'short' }).replace('.', '');
+  const d = parseDay(iso);
+  return d ? `${d.getDate()} ${AZ_MONTHS_SHORT[d.getMonth()]}` : iso;
+};
+
+export const dayLabelLong = (iso: string) => {
+  const d = parseDay(iso);
+  return d ? `${d.getDate()} ${AZ_MONTHS[d.getMonth()]}` : iso;
 };
