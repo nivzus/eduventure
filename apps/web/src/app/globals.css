@@ -434,3 +434,11 @@ html.theme-switching *::before,
 html.theme-switching *::after {
   transition: background-color 0.35s var(--ease-out-expo), border-color 0.35s var(--ease-out-expo), color 0.25s var(--ease-out-expo) !important;
 }
+
+/* Print only the certificate when it is open */
+@media print {
+  body:has(#ev-certificate) * { visibility: hidden; }
+  #ev-certificate, #ev-certificate * { visibility: visible; }
+  #ev-certificate { position: fixed; inset: 0; margin: auto; width: 100%; border: 0; }
+  body::after { display: none; }
+}
