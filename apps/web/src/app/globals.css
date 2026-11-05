@@ -22,9 +22,9 @@
   --fg-muted: #a09daa;
   --fg-subtle: #6b6878;
 
-  --signal: #e8ff59;
-  --signal-fg: #0b0b10;
-  --ember: #ff6b3d;
+  --signal: #ff8a1f; /* brand cat orange */
+  --signal-fg: #140a03;
+  --ember: #ffb547; /* amber/honey — second orange shade */
   --glacier: #7ce7ff;
   --aurora: #9b7bff;
   --moss: #4ade80;
@@ -52,9 +52,9 @@
   --fg-muted: #5d5a66;
   --fg-subtle: #8a8694;
 
-  --signal: #1a1a22;
-  --signal-fg: #e8ff59;
-  --ember: #e8542a;
+  --signal: #f57c1f; /* brand cat orange */
+  --signal-fg: #1a0e05;
+  --ember: #c2410c; /* burnt orange */
   --glacier: #0a8fb5;
   --aurora: #6b4bff;
   --moss: #15803d;

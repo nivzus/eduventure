@@ -354,7 +354,7 @@ function Reader({ article }: { article: Article }) {
       <button
         type="button"
         onClick={() => setTocOpen(true)}
-        className="ev-noprint fixed right-4 bottom-24 z-40 inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface/90 py-1.5 pr-4 pl-1.5 text-sm shadow-pop backdrop-blur-xl lg:hidden"
+        className="ev-noprint fixed right-4 bottom-24 z-40 inline-flex items-center gap-2 rounded-full border border-line-strong bg-surface/90 py-1.5 pr-4 pl-1.5 text-sm shadow-pop backdrop-blur-xl xl:hidden"
         aria-label="Mündəricatı aç"
       >
         <ProgressRing value={reading.percent} size={32} stroke={3} tone={reading.completed ? 'moss' : 'signal'} />

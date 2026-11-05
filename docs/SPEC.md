@@ -17,6 +17,8 @@ Next rewrites `/api/:path*` → `http://localhost:4000/api/:path*` (env `API_URL
 
 Learning = an expedition. Topographic contour lines, trails with waypoints, altitude = XP, summit flag = completion. Editorial typography + bold signal color on deep ink. Not a generic SaaS dashboard: asymmetric bento grids, oversized display type, mono meta-labels, generous negative space, tactile micro-motion.
 
+**Owner decision: the brand stays ORANGE.** Primary `--signal` = cat orange (#FF8A1F dark / #F57C1F light), `--ember` = second orange shade (amber #FFB547 dark / burnt #C2410C light). Old lime values below are superseded.
+
 ### Tokens (CSS variables in `apps/web/src/app/globals.css`, Tailwind v4 `@theme`)
 Dark (default, `data-theme="dark"` on `<html>`):
 - `--bg` #0B0B10 (ink) · `--bg-elev` #13131B · `--bg-sunken` #08080C · `--surface` #191923 · `--border` rgba(255,255,255,.08) · `--border-strong` rgba(255,255,255,.16)
