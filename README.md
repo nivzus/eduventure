@@ -232,13 +232,13 @@ Addım-addım təlimat: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## Köhnə versiya
 
-İlkin Create React App + Supabase versiyası koddan silinib və git-də `legacy-v1` tegi ilə saxlanılıb (`git checkout legacy-v1`). O, yalnız funksionallığı müqayisə etmək üçün istinaddır, yeni CI tərəfindən build edilmir və yeni tətbiqlə əlaqəli deyil.
+İlkin Create React App + Supabase versiyası koddan silinib və git-də `legacy-v1` budağında saxlanılıb (`git checkout legacy-v1`). O, yalnız funksionallığı müqayisə etmək üçün istinaddır, yeni CI tərəfindən build edilmir və yeni tətbiqlə əlaqəli deyil.
 
 ---
 
 ## English
 
-**Eduventure** is an English-learning LMS for Azerbaijani speakers (UI in Azerbaijani), created by English teacher Sədaqət Ağayeva ("Seda"). Version 2.0 rewrites the original CRA + Supabase app (kept in git tag `legacy-v1`) as a monorepo:
+**Eduventure** is an English-learning LMS for Azerbaijani speakers (UI in Azerbaijani), created by English teacher Sədaqət Ağayeva ("Seda"). Version 2.0 rewrites the original CRA + Supabase app (kept in git branch `legacy-v1`) as a monorepo:
 
 - `apps/api` — **NestJS 11 + Prisma 6 + PostgreSQL 16**, port `4000`, global prefix `/api`, httpOnly cookie auth (15-min access + 30-day refresh JWT with token versioning).
 - `apps/web` — **Next.js 15 App Router + Tailwind v4 + motion**, port `3000`; rewrites `/api/*` to `API_URL`, so the browser is same-origin with the API.
