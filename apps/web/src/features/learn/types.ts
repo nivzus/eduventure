@@ -1,0 +1,287 @@
+/**
+ * Response shapes for the learn feature (SPEC §2/§3). Kept local and tolerant (lots of optionals)
+ * so UI keeps working while the API evolves; base enums mirror the Prisma schema.
+ */
+
+export type ContentType = 'QUIZ' | 'ARTICLE' | 'COURSE' | 'PATH' | 'DECK';
+export type ContentStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type Visibility = 'PUBLIC' | 'PRIVATE' | 'GROUPS' | 'PASSCODE';
+export type CourseItemType = 'ARTICLE' | 'QUIZ' | 'DECK';
+export type HighlightColor = 'signal' | 'ember' | 'aurora' | 'glacier';
+export type Grade = 0 | 1 | 2 | 3;
+
+export interface AuthorLite {
+  id: string;
+  name: string;
+  avatarUrl?: string | null;
+}
+
+interface ContentBase {
+  id: string;
+  title: string;
+  status: ContentStatus;
+  visibility: Visibility;
+  passcode?: string | null;
+  authorId: string;
+  author?: AuthorLite | null;
+  createdAt: string;
+  updatedAt: string;
+  /** API may flag gated content it refuses to fully return */
+  locked?: boolean;
+  bookmarked?: boolean;
+  groupIds?: string[];
+}
+
+// ───────────── Articles ─────────────
+
+export interface ArticleProgressInfo {
+  progress: number;
+  completedAt?: string | null;
+}
+
+export interface QuizLite {
+  id: string;
+  title: string;
+  description?: string | null;
+  category?: string | null;
+  questionCount?: number;
+  _count?: { questions?: number };
+  timeLimitSec?: number | null;
+  status?: ContentStatus;
+}
+
+export interface Article extends ContentBase {
+  slug: string;
+  excerpt?: string | null;
+  content?: string;
+  coverUrl?: string | null;
+  category?: string | null;
+  tags: string[];
+  readingMinutes: number;
+  /** list endpoint: number (0-100) or object; normalised via `progressOf()` */
+  myProgress?: ArticleProgressInfo | number | null;
+  progress?: ArticleProgressInfo | number | null;
+  relatedQuizzes?: (QuizLite | { quiz: QuizLite })[];
+  relatedQuizIds?: string[];
+}
+
+export interface ArticleProgressResponse {
+  progress: number;
+  completedAt?: string | null;
+  xpGained?: number;
+  justCompleted?: boolean;
+  completed?: boolean;
+}
+
+export interface Annotation {
+  id: string;
+  userId?: string;
+  articleId: string;
+  quote: string;
+  note?: string | null;
+  color: HighlightColor;
+  startOffset: number;
+  endOffset: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ArticleInput {
+  title: string;
+  slug?: string;
+  excerpt?: string | null;
+  content: string;
+  coverUrl?: string | null;
+  category?: string | null;
+  tags: string[];
+  status: ContentStatus;
+  visibility: Visibility;
+  passcode?: string | null;
+  relatedQuizIds?: string[];
+  quizIds?: string[];
+  groupIds?: string[];
+}
+
+// ───────────── Courses ─────────────
+
+export interface ItemSummary {
+  id: string;
+  title: string;
+  slug?: string;
+  excerpt?: string | null;
+  description?: string | null;
+  readingMinutes?: number;
+  questionCount?: number;
+  cardCount?: number;
+  category?: string | null;
+}
+
+export interface CourseItem {
+  id: string;
+  courseId?: string;
+  order: number;
+  type: CourseItemType;
+  articleId?: string | null;
+  quizId?: string | null;
+  deckId?: string | null;
+  article?: ItemSummary | null;
+  quiz?: ItemSummary | null;
+  deck?: ItemSummary | null;
+  done?: boolean;
+}
+
+export interface Course extends ContentBase {
+  description?: string | null;
+  coverUrl?: string | null;
+  category?: string | null;
+  level?: string | null;
+  items?: CourseItem[];
+  itemCount?: number;
+  _count?: { items?: number };
+  /** 0..1 */
+  progress?: number;
+  completed?: boolean;
+  completedAt?: string | null;
+  doneCount?: number;
+}
+
+export interface CourseCompleteResponse {
+  completedAt?: string;
+  xpGained?: number;
+  alreadyCompleted?: boolean;
+  newAchievements?: { id: string; title: string }[];
+}
+
+export interface CourseInput {
+  title: string;
+  description?: string | null;
+  coverUrl?: string | null;
+  category?: string | null;
+  level?: string | null;
+  status: ContentStatus;
+  visibility: Visibility;
+  passcode?: string | null;
+  items: { type: CourseItemType; articleId?: string; quizId?: string; deckId?: string }[];
+  groupIds?: string[];
+}
+
+// ───────────── Paths ─────────────
+
+export interface PathCourse extends Course {
+  pathItemId?: string;
+}
+
+export interface LearningPath extends ContentBase {
+  description?: string | null;
+  coverUrl?: string | null;
+  courses?: PathCourse[];
+  items?: { id: string; order: number; courseId: string; course?: PathCourse }[];
+  courseCount?: number;
+  _count?: { items?: number };
+  /** 0..1 */
+  progress?: number;
+}
+
+export interface PathInput {
+  title: string;
+  description?: string | null;
+  coverUrl?: string | null;
+  status: ContentStatus;
+  visibility: Visibility;
+  passcode?: string | null;
+  courseIds: string[];
+  groupIds?: string[];
+}
+
+// ───────────── Decks ─────────────
+
+export interface Flashcard {
+  id: string;
+  deckId?: string;
+  order: number;
+  front: string;
+  back: string;
+  example?: string | null;
+  review?: CardReviewState | null;
+}
+
+export interface CardReviewState {
+  ease: number;
+  interval: number;
+  repetitions: number;
+  dueAt: string;
+  lastGrade?: number | null;
+}
+
+export interface Deck extends ContentBase {
+  description?: string | null;
+  category?: string | null;
+  cards?: Flashcard[];
+  cardCount?: number;
+  dueCount?: number;
+  newCount?: number;
+  learnedCount?: number;
+  _count?: { cards?: number };
+}
+
+export interface StudyCard extends Flashcard {
+  isNew?: boolean;
+}
+
+export interface StudySession {
+  deck?: { id: string; title: string; description?: string | null };
+  cards: StudyCard[];
+  dueCount?: number;
+  newCount?: number;
+  nextDueAt?: string | null;
+}
+
+export interface DeckInput {
+  title: string;
+  description?: string | null;
+  category?: string | null;
+  status: ContentStatus;
+  visibility: Visibility;
+  passcode?: string | null;
+  cards: { front: string; back: string; example?: string | null }[];
+  groupIds?: string[];
+}
+
+// ───────────── Community bits used here ─────────────
+
+export interface CommentNode {
+  id: string;
+  userId: string;
+  targetType: string;
+  targetId: string;
+  parentId?: string | null;
+  body: string;
+  createdAt: string;
+  user?: AuthorLite | null;
+  replies?: CommentNode[];
+  children?: CommentNode[];
+}
+
+export interface Bookmark {
+  id?: string;
+  contentType: ContentType;
+  contentId: string;
+  createdAt?: string;
+  content?: (ItemSummary & { coverUrl?: string | null; link?: string }) | null;
+}
+
+export interface SearchResults {
+  quizzes: (QuizLite & { description?: string | null })[];
+  articles: Article[];
+  courses: Course[];
+  paths: LearningPath[];
+  decks: Deck[];
+}
+
+export interface GroupLite {
+  id: string;
+  name: string;
+  color?: string | null;
+  _count?: { members?: number };
+  memberCount?: number;
+}

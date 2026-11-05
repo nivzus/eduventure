@@ -106,27 +106,28 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  quizzes             Quiz[]              @relation("QuizAuthor")
-  bankQuestions       BankQuestion[]      @relation("BankAuthor")
-  attempts            Attempt[]
-  articles            Article[]           @relation("ArticleAuthor")
-  articleProgress     ArticleProgress[]
-  annotations         Annotation[]
-  courses             Course[]            @relation("CourseAuthor")
-  courseCompletions   CourseCompletion[]
-  paths               LearningPath[]      @relation("PathAuthor")
-  decks               FlashcardDeck[]     @relation("DeckAuthor")
-  flashcardReviews    FlashcardReview[]
-  teachingGroups      Group[]             @relation("GroupTeacher")
-  memberships         GroupMember[]
-  assignments         Assignment[]        @relation("AssignmentUser")
-  assignmentsCreated  Assignment[]        @relation("AssignmentAssignedBy")
-  notifications       Notification[]
-  comments            Comment[]
-  bookmarks           Bookmark[]
-  achievements        UserAchievement[]
-  quests              UserQuest[]
-  xpEvents            XpEvent[]
+  quizzes            Quiz[]             @relation("QuizAuthor")
+  bankQuestions      BankQuestion[]     @relation("BankAuthor")
+  attempts           Attempt[]
+  articles           Article[]          @relation("ArticleAuthor")
+  articleProgress    ArticleProgress[]
+  annotations        Annotation[]
+  courses            Course[]           @relation("CourseAuthor")
+  courseCompletions  CourseCompletion[]
+  paths              LearningPath[]     @relation("PathAuthor")
+  decks              FlashcardDeck[]    @relation("DeckAuthor")
+  flashcardReviews   FlashcardReview[]
+  teachingGroups     Group[]            @relation("GroupTeacher")
+  memberships        GroupMember[]
+  assignments        Assignment[]       @relation("AssignmentUser")
+  assignmentsCreated Assignment[]       @relation("AssignmentAssignedBy")
+  notifications      Notification[]
+  comments           Comment[]
+  bookmarks          Bookmark[]
+  achievements       UserAchievement[]
+  quests             UserQuest[]
+  xpEvents           XpEvent[]
+  contentUnlocks     ContentUnlock[]
 
   @@index([role])
   @@index([xp])
@@ -507,6 +508,19 @@ model ContentAccess {
 
   @@unique([contentType, contentId, groupId])
   @@index([groupId])
+}
+
+/// A user unlocked PASSCODE content (POST /content/:type/:id/unlock). Not in SPEC §2 — additive helper.
+model ContentUnlock {
+  id          String      @id @default(cuid())
+  userId      String
+  contentType ContentType
+  contentId   String
+  createdAt   DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, contentType, contentId])
 }
 
 model Assignment {
