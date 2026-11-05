@@ -152,6 +152,7 @@ export interface QuizStatsUserRow {
   attempts: number;
   bestPercent: number | null;
   avgPercent: number | null;
+  lastPercent?: number | null;
   lastAt?: string | null;
 }
 
@@ -164,8 +165,9 @@ export interface QuizStatsView {
   avgTimeSec: number | null;
   distribution: { label: string; count: number }[];
   /** correctRate 0–1 */
-  questions: { id: string; text: string; type: string; correctRate: number | null; avgPoints: number | null; maxPoints?: number }[];
+  questions: { id: string; text: string; type: string; correctRate: number | null; avgPoints: number | null; maxPoints?: number; discrimination?: number | null }[];
   byUser: QuizStatsUserRow[];
+  pendingReview?: number;
   derived?: boolean;
 }
 
@@ -178,5 +180,8 @@ export interface GroupStatsView {
   /** 0–1 */
   completionRate: number | null;
   byUser: QuizStatsUserRow[];
+  quizzes: { id: string; title: string; attempts: number; avgPercent: number | null; passRate: number | null }[];
+  /** accuracy 0–1 */
+  weakTopics: { tag: string; accuracy: number; total: number }[];
   derived?: boolean;
 }

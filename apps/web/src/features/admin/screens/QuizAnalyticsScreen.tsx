@@ -72,8 +72,8 @@ export function QuizAnalyticsScreen({ id }: { id: string }) {
     if (!s) return;
     downloadCsv(
       `${s.quiz.title.replace(/[^\p{L}\p{N}]+/gu, '-').toLowerCase()}-${stamp()}`,
-      ['Tələbə', 'Cəhd sayı', 'Ən yaxşı %', 'Orta %', 'Son cəhd'],
-      s.byUser.map((u) => [u.name, u.attempts, u.bestPercent?.toFixed(1) ?? '', u.avgPercent?.toFixed(1) ?? '', u.lastAt ?? '']),
+      ['Tələbə', 'Cəhd sayı', 'Ən yaxşı %', 'Orta %', 'Son nəticə %', 'Son cəhd'],
+      s.byUser.map((u) => [u.name, u.attempts, u.bestPercent?.toFixed(1) ?? '', u.avgPercent?.toFixed(1) ?? '', u.lastPercent?.toFixed(1) ?? '', u.lastAt ?? '']),
     );
   };
   const exportQuestionsCsv = () => {
@@ -81,7 +81,7 @@ export function QuizAnalyticsScreen({ id }: { id: string }) {
     downloadCsv(
       `suallar-${stamp()}`,
       ['#', 'Sual', 'Tip', 'Düzgün cavab %', 'Orta bal', 'Maks bal', 'Ayırdetmə indeksi'],
-      s.questions.map((q, i) => [i + 1, q.text, q.type, q.correctRate == null ? '' : (q.correctRate * 100).toFixed(1), q.avgPoints?.toFixed(2) ?? '', q.maxPoints ?? '', items.get(q.id)?.d?.toFixed(2) ?? '']),
+      s.questions.map((q, i) => [i + 1, q.text, q.type, q.correctRate == null ? '' : (q.correctRate * 100).toFixed(1), q.avgPoints?.toFixed(2) ?? '', q.maxPoints ?? '', (q.discrimination ?? items.get(q.id)?.d)?.toFixed(2) ?? '']),
     );
   };
 
@@ -110,7 +110,7 @@ export function QuizAnalyticsScreen({ id }: { id: string }) {
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-            <Kpi index={0} label="Cəhdlər" value={s?.attempts} hint={s ? `${s.byUser.length} tələbə` : undefined} />
+            <Kpi index={0} label="Cəhdlər" value={s?.attempts} hint={s ? `${s.byUser.length} tələbə${s.pendingReview ? ` · ${s.pendingReview} yoxlanılır` : ''}` : undefined} />
             <Kpi index={1} label="Orta nəticə" value={s?.avgPercent == null ? null : Math.round(s.avgPercent)} suffix="%" />
             <Kpi index={2} tone="signal" label="Keçid faizi" value={s?.passRate == null ? null : Math.round(s.passRate * 100)} suffix="%" hint={`≥ ${pass}% toplayanlar`} />
             <Kpi index={3} label="Orta vaxt" value={s?.avgTimeSec == null ? null : Math.round(s.avgTimeSec / 60)} suffix=" dəq" hint={s?.avgTimeSec != null ? formatDuration(s.avgTimeSec) : undefined} />
@@ -180,7 +180,7 @@ export function QuizAnalyticsScreen({ id }: { id: string }) {
                 max={1}
                 data={questions.map((q) => {
                   const diff = q.correctRate == null ? null : difficultyLabel(q.correctRate);
-                  const it = items.get(q.id);
+                  const d = q.discrimination ?? items.get(q.id)?.d ?? null;
                   const isHardest = hardest?.id === q.id && (q.correctRate ?? 1) < 0.85;
                   return {
                     key: q.id,
@@ -210,7 +210,7 @@ export function QuizAnalyticsScreen({ id }: { id: string }) {
                             {q.maxPoints ? ` / ${q.maxPoints}` : ''}
                           </span>
                         )}
-                        {it && it.d != null && <span>ayırdetmə {it.d.toFixed(2)} · {discriminationLabel(it.d)}</span>}
+                        {d != null && <span>ayırdetmə {d.toFixed(2)} · {discriminationLabel(d)}</span>}
                       </span>
                     ),
                   };
@@ -239,7 +239,7 @@ export function QuizAnalyticsScreen({ id }: { id: string }) {
                       <TH>Tələbə</TH>
                       <TH className="text-right">Cəhd</TH>
                       <TH>Ən yaxşı</TH>
-                      <TH>Orta</TH>
+                      <TH>Son nəticə</TH>
                       <TH>Son cəhd</TH>
                     </TR>
                   </THead>
@@ -257,7 +257,7 @@ export function QuizAnalyticsScreen({ id }: { id: string }) {
                           <PctBar value={u.bestPercent} pass={pass} />
                         </TD>
                         <TD>
-                          <PctBar value={u.avgPercent} />
+                          <PctBar value={u.lastPercent ?? u.avgPercent} />
                         </TD>
                         <TD className="whitespace-nowrap text-sm text-muted">{u.lastAt ? formatRelative(u.lastAt) : '—'}</TD>
                       </TR>

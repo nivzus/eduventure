@@ -85,16 +85,20 @@ export function OverviewScreen() {
                       <Link href={a.user ? `/u/${a.user.id}` : '#'} className="block truncate font-semibold hover:underline">
                         {a.user?.name ?? 'İstifadəçi'}
                       </Link>
-                      <Link href={`/admin/analytics/quizzes/${a.quizId}`} className="block truncate text-sm text-muted hover:text-fg">
+                      <Link href={`/admin/analytics/quizzes/${a.quiz?.id ?? a.quizId}`} className="block truncate text-sm text-muted hover:text-fg">
                         {a.quiz?.title ?? 'Test'}
                       </Link>
                     </div>
                     <div className="hidden text-right font-mono text-xs text-subtle sm:block">{formatRelative(a.submittedAt ?? a.createdAt)}</div>
-                    <div className="relative w-16 shrink-0 text-right">
+                    <div className="relative w-20 shrink-0 text-right">
                       {a.percent >= 100 ? (
                         <Stamp tone="moss" rotate={-8} className="!px-2 !py-1">
                           100%
                         </Stamp>
+                      ) : a.status === 'PENDING_REVIEW' ? (
+                        <Badge tone="glacier" variant="soft" title="Müəllim yoxlaması gözləyir">
+                          yoxlanılır
+                        </Badge>
                       ) : (
                         <Badge tone={a.passed ? 'moss' : 'ember'} variant="soft" mono>
                           {Math.round(a.percent ?? 0)}%

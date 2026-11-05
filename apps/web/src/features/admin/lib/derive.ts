@@ -64,7 +64,7 @@ export function byUserFrom(attempts: AdminAttempt[]): QuizStatsUserRow[] {
   return [...m.entries()]
     .map(([userId, list]) => {
       const ps = list.map((a) => a.percent ?? 0);
-      const last = list.map(when).filter(Boolean).sort().pop() ?? null;
+      const latest = [...list].sort((a, b) => +new Date(when(b) ?? 0) - +new Date(when(a) ?? 0))[0];
       return {
         userId,
         name: list[0].user?.name ?? 'İstifadəçi',
@@ -72,7 +72,8 @@ export function byUserFrom(attempts: AdminAttempt[]): QuizStatsUserRow[] {
         attempts: list.length,
         bestPercent: ps.length ? Math.max(...ps) : null,
         avgPercent: mean(ps),
-        lastAt: last,
+        lastPercent: latest?.percent ?? null,
+        lastAt: latest ? when(latest) : null,
       };
     })
     .sort((a, b) => (b.bestPercent ?? 0) - (a.bestPercent ?? 0));
@@ -151,7 +152,8 @@ function normalizeUserRow(u: Obj): QuizStatsUserRow {
     attempts: num(u.attempts ?? u.attemptsCount ?? u.count) ?? 0,
     bestPercent: toPercent(u.bestPercent ?? u.best ?? u.maxPercent),
     avgPercent: toPercent(u.avgPercent ?? u.avg),
-    lastAt: (u.lastAt ?? u.last ?? u.lastAttemptAt ?? u.submittedAt ?? null) as string | null,
+    lastPercent: toPercent(u.lastPercent ?? (typeof u.last === 'number' ? u.last : null)),
+    lastAt: [u.lastAt, u.lastAttemptAt, u.last, u.lastActiveAt].find((x): x is string => typeof x === 'string') ?? null,
   };
 }
 
@@ -173,8 +175,10 @@ export function normalizeQuizStats(raw: QuizStatsData | Obj): QuizStatsView {
       correctRate: toRatio(q.correctRate ?? q.rate),
       avgPoints: num(q.avgPoints),
       maxPoints: num(q.maxPoints ?? q.points) ?? undefined,
+      discrimination: num(q.discrimination),
     })),
     byUser: arr<Obj>(r.byUser).map(normalizeUserRow),
+    pendingReview: num(r.pendingReview) ?? undefined,
   };
 }
 
@@ -215,12 +219,21 @@ export function normalizeGroupStats(raw: GroupStatsData | Obj): GroupStatsView {
   const r = raw as Obj;
   const rows = arr<Obj>(r.byUser ?? r.members ?? r.students).filter(isObj);
   return {
-    members: num(r.memberCount ?? (typeof r.members === 'number' ? r.members : null)) ?? (Array.isArray(r.members) ? r.members.length : null),
+    members:
+      num(r.memberCount ?? (isObj(r.group) ? r.group.memberCount : null) ?? (typeof r.members === 'number' ? r.members : null)) ??
+      (Array.isArray(r.members) ? r.members.length : null),
     attempts: num(r.attempts ?? r.attemptsCount),
     avgPercent: toPercent(r.avgPercent),
     passRate: toRatio(r.passRate),
     completionRate: toRatio(r.completionRate ?? r.assignmentCompletion),
     byUser: rows.map(normalizeUserRow),
+    quizzes: arr<Obj>(r.quizzes).map((q) => {
+      const quiz = isObj(q.quiz) ? q.quiz : q;
+      return { id: String(quiz.id ?? ''), title: String(quiz.title ?? 'Test'), attempts: num(q.attempts) ?? 0, avgPercent: toPercent(q.avgPercent), passRate: toRatio(q.passRate) };
+    }),
+    weakTopics: arr<Obj>(r.weakTopics)
+      .map((t) => ({ tag: String(t.tag ?? t.topic ?? ''), accuracy: toRatio(t.accuracy ?? t.correctRate) ?? 0, total: num(t.total) ?? 0 }))
+      .filter((t) => t.tag),
   };
 }
 
@@ -234,6 +247,8 @@ export function groupStatsFrom(memberIds: string[], attempts: AdminAttempt[]): G
     passRate: scored.length ? scored.filter((a) => a.passed).length / scored.length : null,
     completionRate: null,
     byUser: byUserFrom(scored),
+    quizzes: [],
+    weakTopics: [],
     derived: true,
   };
 }

@@ -209,6 +209,45 @@ export function GroupDetailScreen({ id }: { id: string }) {
         </div>
       </div>
 
+      {!!(stats.data?.quizzes.length || stats.data?.weakTopics.length) && (
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <Sheet title="Testlər üzrə" note="qrupun orta nəticəsi">
+            <HBarList
+              inked
+              max={100}
+              emptyLabel="Hələ nəticə yoxdur"
+              data={(stats.data?.quizzes ?? []).map((q) => ({
+                key: q.id,
+                label: (
+                  <Link href={`/admin/analytics/quizzes/${q.id}`} className="font-semibold hover:underline">
+                    {q.title}
+                  </Link>
+                ),
+                value: q.avgPercent ?? 0,
+                display: `${Math.round(q.avgPercent ?? 0)}% · ${q.attempts} cəhd`,
+              }))}
+            />
+          </Sheet>
+          <Sheet title="Zəif mövzular" note="ən az düzgün cavablanan teqlər">
+            <HBarList
+              inked
+              max={1}
+              emptyLabel="Mövzu məlumatı yoxdur"
+              data={[...(stats.data?.weakTopics ?? [])]
+                .sort((a, b) => a.accuracy - b.accuracy)
+                .slice(0, 6)
+                .map((t) => ({
+                  key: t.tag,
+                  label: <span className="font-mono text-sm">#{t.tag}</span>,
+                  value: t.accuracy,
+                  color: t.accuracy < 0.5 ? 'var(--ember)' : 'var(--signal)',
+                  display: `${Math.round(t.accuracy * 100)}% · ${t.total} cavab`,
+                }))}
+            />
+          </Sheet>
+        </div>
+      )}
+
       {g && (
         <>
           <GroupFormModal open={edit} onClose={() => setEdit(false)} group={g} />

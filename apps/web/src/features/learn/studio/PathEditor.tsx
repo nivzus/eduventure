@@ -180,7 +180,7 @@ function PathEditor({ id, initial }: { id: string; initial: PathForm }) {
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 truncate font-semibold">
-                              <GraduationCap className="size-4 shrink-0 text-muted" />
+                              <GraduationCap className="hidden size-4 shrink-0 text-muted sm:block" />
                               <span className="truncate">{c.title}</span>
                             </div>
                             {c.sub && <div className="truncate text-xs text-muted">{c.sub}</div>}
