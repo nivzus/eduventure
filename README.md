@@ -2,7 +2,7 @@
 
 **İngilis dilini birlikdə öyrənək.** Eduventure — müəllim Sədaqət Ağayeva (Seda) tərəfindən yaradılmış, Azərbaycan dilində interfeysi olan ingilis dili öyrənmə platformasıdır (LMS). Öyrənmə bir ekspedisiyadır: hər test bir zirvə, hər XP bir yüksəklik, hər seriya (streak) bir düşərgə odudur.
 
-[![CI](https://github.com/nurirustamov/nurirustamov.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/nurirustamov/nurirustamov.github.io/actions/workflows/ci.yml)
+[![CI](https://github.com/nivzus/eduventure/actions/workflows/ci.yml/badge.svg)](https://github.com/nivzus/eduventure/actions/workflows/ci.yml)
 
 > Eduventure 2.0 is a full rewrite of the original Create React App + Supabase project as a **Next.js 15 + NestJS 11 + PostgreSQL** monorepo. English summary → [below](#english).
 
@@ -81,7 +81,7 @@ flowchart LR
 Tələblər: Docker 24+ və Docker Compose v2.
 
 ```bash
-git clone https://github.com/nurirustamov/nurirustamov.github.io.git eduventure
+git clone https://github.com/nivzus/eduventure.git
 cd eduventure
 
 cp .env.prod.example .env          # sirləri dəyişin: openssl rand -hex 32
