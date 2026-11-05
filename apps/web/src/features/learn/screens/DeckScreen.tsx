@@ -46,7 +46,7 @@ export function DeckScreen({ id }: { id: string }) {
           </ButtonLink>
         </div>
         {learned > 0 && learned === cards.length && (
-          <Stamp inView={false} delay={0.5} tone="moss" className="absolute right-6 top-6 text-[10px]">Hamısı<br />öyrənilib</Stamp>
+          <Stamp inView={false} delay={0.5} tone="moss" className="absolute bottom-6 right-6 hidden text-[10px] sm:grid">Hamısı<br />öyrənilib</Stamp>
         )}
       </section>
 

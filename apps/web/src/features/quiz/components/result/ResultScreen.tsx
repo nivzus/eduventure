@@ -137,7 +137,7 @@ export function ResultScreen({ id }: { id: string }) {
               </div>
             </div>
             {!pending && (
-              <Stamp inView={false} delay={1.4} tone={passed ? 'moss' : 'danger'} rotate={passed ? -14 : 10} className="absolute -right-2 top-0 text-[11px] sm:right-2">
+              <Stamp inView={false} delay={1.4} tone={passed ? 'moss' : 'danger'} rotate={passed ? -14 : 10} className="absolute bottom-0 right-0 text-[11px]">
                 {passed ? <>Keçdin<br />✓</> : <>Hələ<br />yox</>}
               </Stamp>
             )}

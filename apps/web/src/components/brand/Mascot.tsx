@@ -33,7 +33,8 @@ export interface MascotProps {
 export function Mascot({ mode = 'static', size = 140, message, className }: MascotProps) {
   const reduce = useReducedMotion();
   const h = size;
-  const w = (size * 141) / 279;
+  const w = (size * 52) / 64;
+  const face = mode === 'celebrate' ? 'joy' : mode === 'sad' ? 'sad' : 'happy';
 
   const body =
     reduce || mode === 'static'
@@ -62,8 +63,23 @@ export function Mascot({ mode = 'static', size = 140, message, className }: Masc
         )}
       </AnimatePresence>
 
-      <motion.div style={{ height: h, width: w, originX: 0.5, originY: 1, filter: mode === 'sad' ? 'saturate(.55)' : undefined }} {...body}>
-        <LogoCat className="h-full w-full drop-shadow-[0_6px_0_rgba(42,31,23,.12)]" />
+      <motion.div className="relative" style={{ height: h, width: w, originX: 0.5, originY: 1 }} {...body}>
+        <LogoCat face={face} blink className="h-full w-full drop-shadow-[0_6px_0_rgba(42,31,23,.12)]" />
+        {mode === 'celebrate' && !reduce && (
+          <>
+            {[[-0.1, 0.1, 0], [1.0, 0.05, 0.3], [0.9, 0.45, 0.6]].map(([x, y, d], i) => (
+              <motion.span
+                key={i}
+                className="absolute text-signal"
+                style={{ left: `${x * 100}%`, top: `${y * 100}%`, fontSize: Math.max(12, h * 0.12) }}
+                animate={{ scale: [0, 1.2, 0], rotate: [0, 90] }}
+                transition={{ duration: 1.4, repeat: Infinity, delay: d, repeatDelay: 0.6 }}
+              >
+                ✦
+              </motion.span>
+            ))}
+          </>
+        )}
       </motion.div>
       <svg width={w * 1.4} height="10" viewBox="0 0 100 10" className="-mt-1 text-ink/10" aria-hidden>
         <ellipse cx="50" cy="5" rx="46" ry="3.5" fill="currentColor" />

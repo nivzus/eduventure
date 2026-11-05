@@ -6,7 +6,7 @@ import { Camera, Flame, KeyRound, Pencil, Sparkles, Trophy } from 'lucide-react'
 import { Avatar, Button, Field, Input, Modal, Skeleton, Textarea } from '@/components/ui';
 import { NumberTicker } from '@/components/motion';
 import { AchievementBadge } from '@/components/brand/AchievementBadge';
-import { Highlight, Note, Stamp, Tape } from '@/components/notebook';
+import { Highlight, Note, Tape } from '@/components/notebook';
 import { toast } from '@/components/ui/toast';
 import { useAuth } from '@/lib/auth';
 import { errorMessage } from '@/lib/api';
@@ -50,7 +50,7 @@ export function ProfileScreen() {
         className="relative overflow-hidden rounded-3xl border-2 border-ink bg-elev shadow-[6px_6px_0_0_var(--ink)]"
       >
         <div className="flex items-center justify-between border-b-2 border-dashed border-line-strong bg-sunken px-6 py-3 font-mono text-xs uppercase tracking-[0.18em] text-subtle">
-          <span>Səyyah pasportu · Eduventure</span>
+          <span>Səyyah pasportu<span className="hidden sm:inline"> · Eduventure</span></span>
           <span>№ {user.id.slice(-6).toUpperCase()}</span>
         </div>
         <div className="grid gap-8 p-6 sm:p-8 md:grid-cols-[auto_1fr_auto] md:items-center">
@@ -67,7 +67,7 @@ export function ProfileScreen() {
               <Button size="sm" variant="ghost" leftIcon={<KeyRound />} onClick={() => setPwOpen(true)}>Şifrəni dəyiş</Button>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-center md:grid-cols-1">
+          <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4 md:grid-cols-2">
             <div className="rounded-2xl border-2 border-ink bg-aurora/10 px-4 py-2">
               <div className="hand text-lg text-muted">səviyyə</div>
               <div className="font-display text-3xl font-bold text-aurora">{s?.level ?? user.level}</div>
@@ -79,6 +79,10 @@ export function ProfileScreen() {
             <div className="rounded-2xl border-2 border-ink bg-signal/10 px-4 py-2">
               <div className="hand text-lg text-muted">seriya</div>
               <div className="inline-flex items-center gap-1 font-display text-3xl font-bold"><Flame className="size-6 text-signal" />{s?.streak ?? user.streak}</div>
+            </div>
+            <div className="rounded-2xl border-2 border-ink bg-moss/10 px-4 py-2">
+              <div className="hand text-lg text-muted">reytinq</div>
+              <div className="font-display text-3xl font-bold">{s?.rank ? `#${s.rank}` : '—'}</div>
             </div>
           </div>
         </div>
@@ -92,11 +96,6 @@ export function ProfileScreen() {
             <motion.div className="h-full bg-signal" initial={{ width: 0 }} animate={{ width: `${Math.round((s?.levelProgress ?? 0) * 100)}%` }} transition={{ delay: 0.3, duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
           </div>
         </div>
-        {(s?.rank ?? 0) > 0 && (
-          <Stamp inView={false} delay={0.6} tone="aurora" rotate={12} className="absolute right-4 top-14 hidden text-[10px] md:grid">
-            Reytinq<br /><span className="text-base">#{s?.rank}</span>
-          </Stamp>
-        )}
       </motion.section>
 
       {/* Stats */}

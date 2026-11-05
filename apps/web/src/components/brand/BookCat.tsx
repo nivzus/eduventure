@@ -3,7 +3,7 @@
 import { useId } from 'react';
 import { motion, useReducedMotion, type Transition } from 'motion/react';
 import { cn } from '@/lib/utils';
-import { CAT_DARK, CAT_LIGHT, CAT_ORIGIN, OFFICIAL } from './logo-paths';
+import { OFFICIAL } from './logo-paths';
 
 /** Logo oranges (fixed brand colors from the official SVG, independent of theme). */
 export const LOGO_ORANGE = '#D75818';
@@ -111,12 +111,70 @@ export function OfficialWordmark({ className, color = LOGO_ORANGE }: { className
   );
 }
 
-/** Just the cat silhouette from the logo (for mascots, stamps, empty states). */
-export function LogoCat({ className, color = LOGO_ORANGE, accent = LOGO_PAGE }: { className?: string; color?: string; accent?: string }) {
+/** Rounded back for the logo cat (in the logo it is hidden behind the book spine). */
+const CAT_BACK = 'M80.4 78.4 C 71 80.2, 63.5 90.5, 65 100 C 66 106, 71.5 108.3, 80.4 108.2 Z';
+/** Cuts the cat out of the cover: left of it is the spine, right of the front leg is the page frame. */
+const CAT_CLIP = '79.4,44 114,44 114,80 106.2,80 103.5,92 103.3,98.5 104.6,101.6 108.6,104 108.6,112 79.4,112';
+
+export type CatFace = 'none' | 'happy' | 'joy' | 'sad';
+
+/**
+ * The cat from the official logo, standing on its own (rounded back added), optionally with a cute face.
+ * viewBox is in the logo's coordinate space.
+ */
+export function LogoCat({ className, face = 'none', blink = false }: { className?: string; face?: CatFace; blink?: boolean }) {
+  const reduce = useReducedMotion();
+  const uid = useId().replace(/:/g, '');
   return (
-    <svg viewBox={`0 0 ${CAT_ORIGIN.w} ${CAT_ORIGIN.h}`} className={cn('block', className)} aria-hidden>
-      <path d={CAT_DARK} fill={color} />
-      <path d={CAT_LIGHT} fill={accent} />
+    <svg viewBox="60 46 52 64" className={cn('block', className)} aria-hidden>
+      <defs>
+        <mask id={`m${uid}`} maskUnits="userSpaceOnUse" x="0" y="0" width="160" height="130">
+          <rect width="160" height="130" fill="#fff" />
+          <path d={OFFICIAL.rightPage} fill="#000" />
+        </mask>
+        <clipPath id={`k${uid}`}>
+          <polygon points={CAT_CLIP} />
+        </clipPath>
+      </defs>
+      <path d={CAT_BACK} fill={LOGO_ORANGE} />
+      <g clipPath={`url(#k${uid})`}>
+        <path d={OFFICIAL.base} fill={LOGO_ORANGE} mask={`url(#m${uid})`} />
+      </g>
+      <path d={OFFICIAL.ear} fill={LOGO_ORANGE} />
+      <path d={OFFICIAL.tail} fill={LOGO_PAGE} />
+
+      {face === 'happy' && (
+        <>
+          <motion.g
+            style={{ transformBox: 'fill-box', originY: 0.5 }}
+            animate={blink && !reduce ? { scaleY: [1, 1, 0.1, 1, 1] } : undefined}
+            transition={blink ? { duration: 4, times: [0, 0.47, 0.5, 0.53, 1], repeat: Infinity } : undefined}
+          >
+            <ellipse cx="104" cy="60.6" rx="1.1" ry="1.35" fill="#2a1f17" />
+            <circle cx="104.35" cy="60.15" r="0.38" fill="#fff" />
+          </motion.g>
+          <ellipse cx="105.8" cy="64.5" rx="1.5" ry="0.9" fill="#FF8FA3" opacity=".7" />
+        </>
+      )}
+      {face === 'joy' && (
+        <>
+          <path d="M102.7 61.3 q1.3 -1.6 2.6 0" stroke="#2a1f17" strokeWidth="0.85" fill="none" strokeLinecap="round" />
+          <ellipse cx="105.8" cy="64.5" rx="1.6" ry="1" fill="#FF8FA3" opacity=".85" />
+        </>
+      )}
+      {face === 'sad' && (
+        <>
+          <path d="M102.8 60.3 q1.3 1.3 2.6 0" stroke="#2a1f17" strokeWidth="0.85" fill="none" strokeLinecap="round" />
+          <path d="M102.7 59 l2.3 -0.7" stroke="#2a1f17" strokeWidth="0.6" strokeLinecap="round" />
+          <motion.path
+            d="M104.6 62.2 q-0.9 1.4 0 2 q0.9 -0.6 0 -2 z"
+            fill="#7CC4F0"
+            initial={false}
+            animate={reduce ? undefined : { y: [0, 2.5], opacity: [1, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, repeatDelay: 0.8, ease: 'easeIn' }}
+          />
+        </>
+      )}
     </svg>
   );
 }
