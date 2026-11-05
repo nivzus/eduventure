@@ -61,16 +61,21 @@ export interface Article extends ContentBase {
   /** list endpoint: number (0-100) or object; normalised via `progressOf()` */
   myProgress?: ArticleProgressInfo | number | null;
   progress?: ArticleProgressInfo | number | null;
+  completedAt?: string | null;
+  relatedQuizCount?: number;
+  annotationCount?: number;
   relatedQuizzes?: (QuizLite | { quiz: QuizLite })[];
   relatedQuizIds?: string[];
 }
 
 export interface ArticleProgressResponse {
+  articleId?: string;
   progress: number;
   completedAt?: string | null;
-  xpGained?: number;
-  justCompleted?: boolean;
   completed?: boolean;
+  xpGained?: number;
+  levelUp?: boolean;
+  newAchievements?: { id?: string; title?: string }[];
 }
 
 export interface Annotation {

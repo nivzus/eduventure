@@ -1,0 +1,88 @@
+version: 2
+
+updates:
+  # ── API (NestJS + Prisma) ──
+  - package-ecosystem: npm
+    directory: /apps/api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Baku
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(api)"
+    groups:
+      nestjs:
+        patterns: ["@nestjs/*"]
+      prisma:
+        patterns: ["prisma", "@prisma/*"]
+      types:
+        patterns: ["@types/*"]
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Majors of the core stack are migrated deliberately (see docs/ARCHITECTURE.md)
+      - dependency-name: "@nestjs/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  # ── Web (Next.js) ──
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Asia/Baku
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps(web)"
+    groups:
+      next-react:
+        patterns: ["next", "react", "react-dom", "@types/react", "@types/react-dom"]
+      tailwind:
+        patterns: ["tailwindcss", "@tailwindcss/*"]
+      fontsource:
+        patterns: ["@fontsource/*", "@fontsource-variable/*"]
+      types:
+        patterns: ["@types/*"]
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  # ── Docker base images ──
+  - package-ecosystem: docker
+    directories: [/apps/api, /apps/web]
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "deps(docker)"
+    ignore:
+      # Stay on the Node 22 LTS line
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+
+  # ── GitHub Actions ──
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]

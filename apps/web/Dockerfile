@@ -11,10 +11,8 @@
 # Uses the small `output: 'standalone'` bundle when next.config.ts enables it and falls
 # back to a regular `next start` bundle (production node_modules) otherwise.
 
-ARG NODE_VERSION=22
-
 # ─── base ───
-FROM node:${NODE_VERSION}-alpine AS base
+FROM node:22-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 \

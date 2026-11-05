@@ -8,10 +8,8 @@
 # On start the entrypoint runs `prisma migrate deploy` (see docker-entrypoint.sh),
 # then `node dist/main`. Set SEED_ON_START=true once to load the demo accounts.
 
-ARG NODE_VERSION=22
-
 # ─── base: Debian slim + OpenSSL (Prisma engines need libssl) + tini (PID 1) ───
-FROM node:${NODE_VERSION}-bookworm-slim AS base
+FROM node:22-bookworm-slim AS base
 RUN apt-get update \
  && apt-get install -y --no-install-recommends openssl ca-certificates tini \
  && rm -rf /var/lib/apt/lists/*

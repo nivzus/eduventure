@@ -1,0 +1,214 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    paths-ignore:
+      - "legacy/**"
+      - "**/*.md"
+  pull_request:
+    paths-ignore:
+      - "legacy/**"
+      - "**/*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  api:
+    name: API · NestJS + Prisma
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/api
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: eduventure
+          POSTGRES_USER: eduventure
+          POSTGRES_PASSWORD: eduventure
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U eduventure -d eduventure"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://eduventure:eduventure@localhost:5432/eduventure?schema=public
+      JWT_ACCESS_SECRET: ci-access-secret-not-for-production
+      JWT_REFRESH_SECRET: ci-refresh-secret-not-for-production
+      WEB_ORIGIN: http://localhost:3000
+      UPLOAD_DIR: ./uploads
+      PORT: "4000"
+      GEMINI_API_KEY: ""
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prisma validate + generate
+        run: |
+          npx prisma validate
+          npx prisma generate
+
+      - name: Type-check
+        run: npx tsc --noEmit -p tsconfig.json
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Build
+        run: npm run build
+
+      - name: Apply database schema
+        run: |
+          if ls prisma/migrations/*/migration.sql >/dev/null 2>&1; then
+            npx prisma migrate deploy
+          else
+            echo "::warning title=No Prisma migrations::apps/api/prisma/migrations is empty - using prisma db push. Commit an initial migration for production deploys."
+            npx prisma db push --skip-generate
+          fi
+
+      - name: Check migrations match schema.prisma
+        if: hashFiles('apps/api/prisma/migrations/**/migration.sql') != ''
+        run: |
+          set +e
+          npx prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
+          code=$?
+          if [ "$code" = "2" ]; then
+            echo "::error title=Migration drift::schema.prisma has changes without a migration. Run 'npm run prisma:migrate -- --name <change>' in apps/api and commit it."
+          fi
+          exit $code
+
+      - name: Seed demo data
+        run: npx prisma db seed
+
+      - name: Unit tests
+        run: npm run test --if-present
+
+      - name: E2E tests
+        run: npm run test:e2e --if-present
+
+      - name: Smoke test (boot API, log in as demo admin)
+        run: |
+          node dist/main > api.log 2>&1 &
+          for i in $(seq 1 60); do
+            curl -s -o /dev/null http://localhost:4000/api/auth/me && break
+            sleep 1
+          done
+          status=$(curl -s -o login.json -D headers.txt -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"admin@eduventure.az","password":"Admin123!"}' \
+            http://localhost:4000/api/auth/login)
+          echo "POST /api/auth/login -> $status"; cat login.json; echo
+          case "$status" in 2??) ;; *) echo "::error::login failed"; exit 1 ;; esac
+          grep -qi '^set-cookie: *access_token=' headers.txt || { echo "::error::no access_token cookie"; exit 1; }
+          grep -qi '^set-cookie: *refresh_token=' headers.txt || { echo "::error::no refresh_token cookie"; exit 1; }
+
+      - name: API log
+        if: always()
+        run: cat api.log 2>/dev/null || true
+
+  web:
+    name: Web · Next.js
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: apps/web
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      API_URL: http://localhost:4000
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Next.js types (next-env.d.ts, route types)
+        run: npx next typegen
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Restore Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: apps/web/.next/cache
+          key: nextjs-${{ runner.os }}-${{ hashFiles('apps/web/package-lock.json') }}-${{ hashFiles('apps/web/src/**') }}
+          restore-keys: |
+            nextjs-${{ runner.os }}-${{ hashFiles('apps/web/package-lock.json') }}-
+
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: Docker · compose smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [api, web]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare env
+        run: |
+          cp .env.prod.example .env
+          sed -i "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$(openssl rand -hex 16)/" .env
+          sed -i "s/^JWT_ACCESS_SECRET=.*/JWT_ACCESS_SECRET=$(openssl rand -hex 32)/" .env
+          sed -i "s/^JWT_REFRESH_SECRET=.*/JWT_REFRESH_SECRET=$(openssl rand -hex 32)/" .env
+          sed -i "s/^SEED_ON_START=.*/SEED_ON_START=true/" .env
+
+      - name: Validate compose file
+        run: docker compose -f docker-compose.prod.yml config --quiet
+
+      - name: Build images
+        run: docker compose -f docker-compose.prod.yml build
+
+      - name: Start stack (db + api + web) and wait for healthchecks
+        run: docker compose -f docker-compose.prod.yml up -d --wait --wait-timeout 300
+
+      - name: Log in through the web proxy
+        run: |
+          status=$(curl -s -o login.json -D headers.txt -w '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"admin@eduventure.az","password":"Admin123!"}' \
+            http://localhost:3000/api/auth/login)
+          echo "POST /api/auth/login (via web) -> $status"; cat login.json; echo
+          case "$status" in 2??) ;; *) exit 1 ;; esac
+          grep -qi '^set-cookie: *access_token=' headers.txt
+          curl -sf -o /dev/null http://localhost:3000/ && echo "landing page OK"
+
+      - name: Compose logs
+        if: always()
+        run: docker compose -f docker-compose.prod.yml logs --no-color --tail=200
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f docker-compose.prod.yml down -v

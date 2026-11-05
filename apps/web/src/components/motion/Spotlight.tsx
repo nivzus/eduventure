@@ -13,14 +13,14 @@ export function useSpotlight() {
   }, []);
 }
 
-/** The glow layer. Parent needs `group/spot relative` + useSpotlight handler. */
+/** The glow layer (paints under content). Parent needs `group/spot relative isolate` + useSpotlight() as onPointerMove. */
 export function SpotlightLayer({ size = 380, color = 'var(--signal)', strength = 0.09, className }: { size?: number; color?: string; strength?: number; className?: string }) {
   return (
     <>
       <span
         aria-hidden
         className={cn(
-          'pointer-events-none absolute inset-0 z-0 rounded-[inherit] opacity-0 transition-opacity duration-500 group-hover/spot:opacity-100',
+          'pointer-events-none absolute inset-0 -z-[1] rounded-[inherit] opacity-0 transition-opacity duration-500 group-hover/spot:opacity-100',
           className,
         )}
         style={{
@@ -30,7 +30,7 @@ export function SpotlightLayer({ size = 380, color = 'var(--signal)', strength =
       {/* border glow */}
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 rounded-[inherit] opacity-0 transition-opacity duration-500 group-hover/spot:opacity-100"
+        className="pointer-events-none absolute inset-0 -z-[1] rounded-[inherit] opacity-0 transition-opacity duration-500 group-hover/spot:opacity-100"
         style={{
           padding: 1,
           background: `radial-gradient(${size * 0.6}px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklab, ${color} 55%, transparent), transparent 70%)`,
@@ -63,7 +63,7 @@ export function Spotlight({ children, className, size, color, strength, onPointe
       {...rest}
     >
       <SpotlightLayer size={size} color={color} strength={strength} />
-      <div className="relative z-[1] h-full">{children}</div>
+      {children}
     </div>
   );
 }

@@ -1,0 +1,268 @@
+'use client';
+
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { cn, formatNumber } from '@/lib/utils';
+
+const EASE = [0.22, 1, 0.36, 1] as const;
+
+/* ─────────── helpers ─────────── */
+
+export function useElementWidth<T extends HTMLElement>() {
+  const ref = useRef<T>(null);
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([e]) => setWidth(Math.round(e.contentRect.width)));
+    ro.observe(el);
+    setWidth(Math.round(el.getBoundingClientRect().width));
+    return () => ro.disconnect();
+  }, []);
+  return [ref, width] as const;
+}
+
+export function niceTicks(max: number, count = 4, integer = true): number[] {
+  if (!(max > 0)) return [0, 1];
+  const raw = max / count;
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const norm = raw / mag;
+  let step = (norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10) * mag;
+  if (integer) step = Math.max(1, Math.round(step));
+  const top = Math.ceil(max / step) * step;
+  const out: number[] = [];
+  for (let v = 0; v <= top + 1e-9; v += step) out.push(Number(v.toFixed(6)));
+  return out;
+}
+
+/** Bar path: 4px rounded data-end, square at baseline. */
+function columnPath(x: number, y: number, w: number, h: number, r = 4) {
+  if (h <= 0) return '';
+  const rr = Math.min(r, h, w / 2);
+  const base = y + h;
+  return `M${x},${base}L${x},${y + rr}Q${x},${y} ${x + rr},${y}L${x + w - rr},${y}Q${x + w},${y} ${x + w},${y + rr}L${x + w},${base}Z`;
+}
+
+/* ─────────── ColumnChart ─────────── */
+
+export interface ColumnDatum {
+  key: string;
+  label: string;
+  value: number;
+  /** long label for the tooltip */
+  title?: string;
+  color?: string;
+}
+
+interface ColumnChartProps {
+  data: ColumnDatum[];
+  height?: number;
+  /** touching columns (histogram) separated by a 2px surface gap */
+  touching?: boolean;
+  color?: string;
+  valueLabel?: (v: number) => string;
+  /** vertical marker at a fractional x (0-1 of the plot) */
+  marker?: { at: number; label: string };
+  ariaLabel: string;
+  className?: string;
+  /** dim while refetching (keeps the frame) */
+  stale?: boolean;
+}
+
+export function ColumnChart({ data, height = 240, touching, color = 'var(--signal)', valueLabel, marker, ariaLabel, className, stale }: ColumnChartProps) {
+  const [ref, width] = useElementWidth<HTMLDivElement>();
+  const reduce = useReducedMotion();
+  const [hover, setHover] = useState<number | null>(null);
+  const fmt = valueLabel ?? ((v: number) => formatNumber(v));
+
+  const PAD_L = 34;
+  const PAD_R = 6;
+  const PAD_T = 10;
+  const AXIS = 26;
+  const plotW = Math.max(0, width - PAD_L - PAD_R);
+  const plotH = height - PAD_T - AXIS;
+  const n = data.length || 1;
+  const band = plotW / n;
+  const gap = touching ? 2 : Math.max(2, band * 0.35);
+  const barW = Math.max(1, Math.min(24, band - gap));
+  const max = Math.max(0, ...data.map((d) => d.value));
+  const ticks = niceTicks(max);
+  const top = ticks[ticks.length - 1] || 1;
+  const y = (v: number) => PAD_T + plotH - (v / top) * plotH;
+  const labelEvery = Math.max(1, Math.ceil(n / Math.max(1, plotW / 46)));
+
+  return (
+    <div ref={ref} className={cn('relative w-full transition-opacity duration-300', stale && 'opacity-50', className)} style={{ height }}>
+      {width > 0 && (
+        <svg width={width} height={height} role="img" aria-label={ariaLabel} onPointerLeave={() => setHover(null)}>
+          {/* grid + y ticks */}
+          {ticks.map((t) => (
+            <g key={t}>
+              <line x1={PAD_L} x2={width - PAD_R} y1={y(t)} y2={y(t)} stroke="var(--border)" strokeWidth={1} />
+              <text x={PAD_L - 8} y={y(t) + 3.5} textAnchor="end" className="fill-[var(--fg-subtle)] font-mono text-[10px] tabular">
+                {t >= 10000 ? `${Math.round(t / 1000)}K` : formatNumber(t)}
+              </text>
+            </g>
+          ))}
+          {/* columns */}
+          {data.map((d, i) => {
+            const cx = PAD_L + band * i + band / 2;
+            const h = plotH * (d.value / top);
+            const fill = d.color ?? color;
+            return (
+              <g key={d.key}>
+                <motion.path
+                  d={columnPath(cx - barW / 2, y(d.value), barW, h)}
+                  fill={fill}
+                  initial={reduce ? false : { scaleY: 0 }}
+                  animate={{ scaleY: 1, opacity: hover == null || hover === i ? 1 : 0.55 }}
+                  transition={{ scaleY: { duration: 0.7, delay: 0.1 + i * Math.min(0.03, 0.6 / n), ease: EASE }, opacity: { duration: 0.15 } }}
+                  style={{ originY: 1, transformBox: 'fill-box' }}
+                />
+                {/* hit target: full band */}
+                <rect
+                  x={PAD_L + band * i}
+                  y={PAD_T}
+                  width={band}
+                  height={plotH}
+                  fill="transparent"
+                  tabIndex={0}
+                  aria-label={`${d.title ?? d.label}: ${fmt(d.value)}`}
+                  onPointerEnter={() => setHover(i)}
+                  onFocus={() => setHover(i)}
+                  onBlur={() => setHover(null)}
+                  className="outline-none"
+                />
+                {i % labelEvery === 0 && (
+                  <text x={cx} y={height - 8} textAnchor="middle" className="fill-[var(--fg-subtle)] font-mono text-[10px]">
+                    {d.label}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+          {/* baseline */}
+          <line x1={PAD_L} x2={width - PAD_R} y1={PAD_T + plotH} y2={PAD_T + plotH} stroke="var(--border-strong)" strokeWidth={1} />
+          {marker && (
+            <g>
+              <line
+                x1={PAD_L + plotW * marker.at}
+                x2={PAD_L + plotW * marker.at}
+                y1={PAD_T - 4}
+                y2={PAD_T + plotH}
+                stroke="var(--fg)"
+                strokeOpacity={0.6}
+                strokeWidth={1}
+              />
+              <text x={PAD_L + plotW * marker.at + 6} y={PAD_T + 6} className="fill-[var(--fg-muted)] font-mono text-[10px] uppercase">
+                {marker.label}
+              </text>
+            </g>
+          )}
+        </svg>
+      )}
+      <AnimatePresence>
+        {hover != null && data[hover] && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-xl border border-line bg-surface px-3 py-2 shadow-pop"
+            style={{
+              left: Math.min(Math.max(PAD_L + band * hover + band / 2, 60), width - 60),
+              top: Math.max(y(data[hover].value) - 8, 30),
+            }}
+          >
+            <p className="font-display text-sm font-semibold">{fmt(data[hover].value)}</p>
+            <p className="font-mono text-[10px] uppercase tracking-wider text-subtle">{data[hover].title ?? data[hover].label}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* ─────────── Ranked horizontal bars ─────────── */
+
+export interface HBarDatum {
+  key: string;
+  label: ReactNode;
+  value: number;
+  /** text value shown at the tip */
+  display?: string;
+  sub?: ReactNode;
+  color?: string;
+  href?: string;
+}
+
+export function HBarList({ data, max, color = 'var(--signal)', className, emptyLabel = 'Məlumat yoxdur' }: { data: HBarDatum[]; max?: number; color?: string; className?: string; emptyLabel?: string }) {
+  const reduce = useReducedMotion();
+  const m = max ?? Math.max(1, ...data.map((d) => d.value));
+  if (!data.length) return <p className="py-6 text-center text-sm text-subtle">{emptyLabel}</p>;
+  return (
+    <ol className={cn('space-y-3.5', className)}>
+      {data.map((d, i) => (
+        <li key={d.key} className="group">
+          <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm">
+            <span className="min-w-0 truncate text-fg">{d.label}</span>
+            <span className="shrink-0 font-mono text-xs tabular text-muted">{d.display ?? formatNumber(d.value)}</span>
+          </div>
+          <div className="relative h-2 w-full overflow-hidden rounded-full bg-sunken">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-r-[4px]"
+              style={{ background: d.color ?? color }}
+              initial={reduce ? false : { width: 0 }}
+              whileInView={{ width: `${Math.max(0, Math.min(1, d.value / m)) * 100}%` }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, delay: 0.05 * i, ease: EASE }}
+            />
+          </div>
+          {d.sub && <div className="mt-1 text-xs text-subtle">{d.sub}</div>}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/* ─────────── Diverging bar (−1…1) ─────────── */
+
+export function DivergingBar({ value, className, label }: { value: number; className?: string; label?: string }) {
+  const reduce = useReducedMotion();
+  const v = Math.max(-1, Math.min(1, value));
+  const w = Math.abs(v) * 50;
+  return (
+    <div className={cn('relative h-2 w-full rounded-full bg-sunken', className)} role="img" aria-label={label ?? `${v.toFixed(2)}`}>
+      <span className="absolute inset-y-[-3px] left-1/2 w-px bg-[var(--border-strong)]" />
+      <motion.span
+        className={cn('absolute inset-y-0', v >= 0 ? 'left-1/2 rounded-r-[4px]' : 'right-1/2 rounded-l-[4px]')}
+        style={{ background: v >= 0 ? 'var(--aurora)' : 'var(--ember)' }}
+        initial={reduce ? false : { width: 0 }}
+        whileInView={{ width: `${w}%` }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7, ease: EASE }}
+      />
+    </div>
+  );
+}
+
+/* ─────────── legend swatch ─────────── */
+
+export function LegendItem({ color, label, shape = 'rect' }: { color: string; label: string; shape?: 'rect' | 'line' | 'dot' }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+      <span
+        aria-hidden
+        className={cn(shape === 'rect' && 'size-2.5 rounded-[3px]', shape === 'line' && 'h-0.5 w-3 rounded-full', shape === 'dot' && 'size-2 rounded-full')}
+        style={{ background: color }}
+      />
+      {label}
+    </span>
+  );
+}
+
+export function useStableData<T>(data: T | undefined): T | undefined {
+  const last = useRef(data);
+  if (data !== undefined) last.current = data;
+  return useMemo(() => last.current, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+}

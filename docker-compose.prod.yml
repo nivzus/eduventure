@@ -1,0 +1,92 @@
+# Eduventure — production-like stack: PostgreSQL 16 + API (NestJS) + Web (Next.js)
+#
+#   cp .env.prod.example .env        # then set real secrets
+#   docker compose -f docker-compose.prod.yml up -d --build
+#   open http://localhost:3000
+#
+# The browser only talks to `web`; Next.js proxies /api/* to `api` over the internal
+# network, so auth cookies stay same-origin. The API applies Prisma migrations on start.
+# First run with demo data:  SEED_ON_START=true docker compose -f docker-compose.prod.yml up -d
+# (or later: docker compose -f docker-compose.prod.yml exec api prisma db seed)
+
+name: eduventure-prod
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-eduventure}
+      POSTGRES_USER: ${POSTGRES_USER:-eduventure}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.prod.example)}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    image: eduventure-api:latest
+    restart: unless-stopped
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-eduventure}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-eduventure}?schema=public
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Set JWT_ACCESS_SECRET in .env (openssl rand -hex 32)}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?Set JWT_REFRESH_SECRET in .env (openssl rand -hex 32)}
+      WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+      UPLOAD_DIR: /app/uploads
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      SEED_ON_START: ${SEED_ON_START:-false}
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      # Not needed by the browser (web proxies /api); exposed on localhost for debugging only.
+      - "127.0.0.1:${API_PORT:-4000}:4000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4000/api/health').then(r=>process.exit(r.status<500?0:1),()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+      args:
+        # Baked into Next.js rewrites at build time: /api/* -> http://api:4000/api/*
+        API_URL: http://api:4000
+    image: eduventure-web:latest
+    restart: unless-stopped
+    init: true
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      API_URL: http://api:4000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.status<500?0:1),()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  pgdata:
+  uploads:

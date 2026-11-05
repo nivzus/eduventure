@@ -19,11 +19,12 @@ export function progressOf(a: Pick<Article, 'myProgress' | 'progress'> | null | 
   return clamp(raw.progress ?? 0);
 }
 
-export function isArticleDone(a: Pick<Article, 'myProgress' | 'progress'> | null | undefined): boolean {
+export function isArticleDone(a: Pick<Article, 'myProgress' | 'progress' | 'completedAt'> | null | undefined): boolean {
   if (!a) return false;
+  if (a.completedAt) return true;
   const raw = a.myProgress ?? a.progress;
   if (raw && typeof raw === 'object' && raw.completedAt) return true;
-  return progressOf(a) >= 90;
+  return progressOf(a) >= 100;
 }
 
 export function relatedQuizzesOf(a: Article | null | undefined): QuizLite[] {
