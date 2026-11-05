@@ -108,7 +108,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5">
             {!isLogin && (
               <Field label="Ad, soyad" htmlFor="name" error={errors.name}>
-                <Input id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seda Məmmədova" />
+                <Input id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Aysel Məmmədova" />
               </Field>
             )}
             <Field label="E-poçt" htmlFor="email" error={errors.email}>

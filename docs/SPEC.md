@@ -1,6 +1,6 @@
 # Eduventure 2.0 — Shared Spec (single source of truth for all agents)
 
-Old project (CRA + Supabase) lives in `legacy/` — read it to understand features (main logic in `legacy/src/App.js`, pages in `legacy/src/pages/*`). UI language: **Azerbaijani** (same copy tone as legacy; ə, ğ, ı, ö, ü, ş, ç must render). Brand: **Eduventure** ("İngilis dilini birlikdə öyrənək" — English-learning platform by Seda). **Brand mascot = the orange cat** (legacy `WavingCat.js`): the logo features the cat; `Mascot`/`MascotPeek` from `@/components/brand` appear in empty states, results (celebrate/sad), onboarding and peek in from the bottom-right with Azerbaijani motivational bubbles.
+Old project (CRA + Supabase) lives in `legacy/` — read it to understand features (main logic in `legacy/src/App.js`, pages in `legacy/src/pages/*`). UI language: **Azerbaijani** (same copy tone as legacy; ə, ğ, ı, ö, ü, ş, ç must render). Brand: **Eduventure** ("İngilis dilini birlikdə öyrənək" — English-learning platform by teacher **Sədaqət Ağayeva** ("Seda"). **Brand mascot = the orange cat** (legacy `WavingCat.js`): the logo features the cat; `Mascot`/`MascotPeek` from `@/components/brand` appear in empty states, results (celebrate/sad), onboarding and peek in from the bottom-right with Azerbaijani motivational bubbles.
 
 Monorepo:
 ```

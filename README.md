@@ -1,6 +1,6 @@
 # Eduventure
 
-**İngilis dilini birlikdə öyrənək.** Eduventure — Seda tərəfindən yaradılmış, Azərbaycan dilində interfeysi olan ingilis dili öyrənmə platformasıdır (LMS). Öyrənmə bir ekspedisiyadır: hər test bir zirvə, hər XP bir yüksəklik, hər seriya (streak) bir düşərgə odudur.
+**İngilis dilini birlikdə öyrənək.** Eduventure — müəllim Sədaqət Ağayeva (Seda) tərəfindən yaradılmış, Azərbaycan dilində interfeysi olan ingilis dili öyrənmə platformasıdır (LMS). Öyrənmə bir ekspedisiyadır: hər test bir zirvə, hər XP bir yüksəklik, hər seriya (streak) bir düşərgə odudur.
 
 [![CI](https://github.com/nurirustamov/nurirustamov.github.io/actions/workflows/ci.yml/badge.svg)](https://github.com/nurirustamov/nurirustamov.github.io/actions/workflows/ci.yml)
 
@@ -167,7 +167,7 @@ Brauzerdə <http://localhost:3000> açın. API ayrıca: `npm run dev:api`, web a
 | Rol | E-poçt | Şifrə |
 |---|---|---|
 | Admin | `admin@eduventure.az` | `Admin123!` |
-| Müəllim (Seda) | `seda@eduventure.az` | `Teacher123!` |
+| Müəllim (Sədaqət Ağayeva) | `seda@eduventure.az` | `Teacher123!` |
 | Tələbələr | seed-dəki tələbə hesabları (`apps/api/prisma/seed.ts`) | `Student123!` |
 
 > ⚠️ Production-da demo şifrələri dərhal dəyişin və ya seed-i işlətməyin.
@@ -239,7 +239,7 @@ Addım-addım təlimat: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ## English
 
-**Eduventure** is an English-learning LMS for Azerbaijani speakers (UI in Azerbaijani), created by Seda. Version 2.0 rewrites the original CRA + Supabase app (kept in [`legacy/`](legacy/)) as a monorepo:
+**Eduventure** is an English-learning LMS for Azerbaijani speakers (UI in Azerbaijani), created by English teacher Sədaqət Ağayeva ("Seda"). Version 2.0 rewrites the original CRA + Supabase app (kept in [`legacy/`](legacy/)) as a monorepo:
 
 - `apps/api` — **NestJS 11 + Prisma 6 + PostgreSQL 16**, port `4000`, global prefix `/api`, httpOnly cookie auth (15-min access + 30-day refresh JWT with token versioning).
 - `apps/web` — **Next.js 15 App Router + Tailwind v4 + motion**, port `3000`; rewrites `/api/*` to `API_URL`, so the browser is same-origin with the API.

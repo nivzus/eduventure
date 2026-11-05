@@ -66,7 +66,7 @@ export function Landing() {
               animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-2 rounded-full border border-line-strong bg-elev/70 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-muted"
             >
-              <span className="size-1.5 animate-pulse rounded-full bg-signal" /> Eduventure 2.0 · Seda ilə ingilis dili
+              <span className="size-1.5 animate-pulse rounded-full bg-signal" /> Eduventure 2.0 · müəllim Sədaqət Ağayeva
             </motion.span>
             <KineticText
               as="h1"
@@ -230,7 +230,7 @@ export function Landing() {
 
       <footer className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 py-10 text-sm text-subtle sm:flex-row sm:px-6">
         <Logo />
-        <span>© {new Date().getFullYear()} Eduventure · Seda ilə ingilis dili</span>
+        <span>© {new Date().getFullYear()} Eduventure · müəllim Sədaqət Ağayeva</span>
       </footer>
     </div>
   );

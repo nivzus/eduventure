@@ -111,7 +111,7 @@ async function main() {
 
   const hash = (p: string) => bcrypt.hashSync(p, 10);
   const admin = await prisma.user.create({ data: { email: 'admin@eduventure.az', name: 'Admin', role: 'ADMIN', passwordHash: hash('Admin123!') } });
-  const seda = await prisma.user.create({ data: { email: 'seda@eduventure.az', name: 'Seda Müəllim', role: 'TEACHER', passwordHash: hash('Teacher123!'), bio: 'İngilis dili müəllimi' } });
+  const seda = await prisma.user.create({ data: { email: 'seda@eduventure.az', name: 'Sədaqət Ağayeva', role: 'TEACHER', passwordHash: hash('Teacher123!'), bio: 'İngilis dili müəllimi, Eduventure-un yaradıcısı' } });
   const names = ['Aysel Məmmədova', 'Rauf Əliyev', 'Nigar Həsənova', 'Tural Quliyev', 'Leyla İsmayılova', 'Elvin Kərimov', 'Günay Babayeva', 'Orxan Rzayev', 'Səbinə Nəbiyeva', 'Kamran Əhmədov'];
   const pw = hash('Student123!');
   const students = [];
