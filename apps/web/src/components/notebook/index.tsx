@@ -96,8 +96,7 @@ export function Stamp({ children, className, tone = 'signal', rotate = -12, dela
   const target = { scale: 1, opacity: 0.92, rotate };
   return (
     <motion.span
-      className={cn('inline-grid place-items-center rounded-full border-[3px] border-double px-4 py-3 text-center font-display text-[11px] font-semibold uppercase leading-tight tracking-[0.14em]', color, className)}
-      style={{ mixBlendMode: 'multiply' }}
+      className={cn('inline-grid place-items-center rounded-full border-[3px] border-double px-4 py-3 text-center font-display text-[11px] font-semibold uppercase leading-tight tracking-[0.14em] mix-blend-multiply dark:mix-blend-normal', color, className)}
       initial={reduce ? false : { scale: 2.2, opacity: 0, rotate: rotate - 18 }}
       {...(inView ? { whileInView: target, viewport: { once: true } } : { animate: target })}
       transition={{ delay, type: 'spring', stiffness: 520, damping: 22, mass: 0.9 }}

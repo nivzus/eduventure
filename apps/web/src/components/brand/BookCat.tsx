@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import { motion, useReducedMotion, type Transition } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { CAT_DARK, CAT_LIGHT, CAT_ORIGIN, OFFICIAL } from './logo-paths';
@@ -23,7 +24,7 @@ export interface BookCatMarkProps {
 }
 
 /**
- * The official Eduventure mark — open book whose white page reveals the sitting cat.
+ * The official Eduventure mark — open book; the right page is transparent and its outline reveals the sitting cat.
  * Paths come 1:1 from public/brand/eduventure-logo.svg.
  */
 export function BookCatMark({ className, animated = false, delay = 0, idle = false, title }: BookCatMarkProps) {
@@ -31,6 +32,7 @@ export function BookCatMark({ className, animated = false, delay = 0, idle = fal
   const play = animated && !reduce;
   const t = (d: number, dur = 0.7): Transition => ({ delay: delay + d, duration: dur, ease: EASE });
   const fill = { transformBox: 'fill-box' as const };
+  const maskId = `ev-page-${useId().replace(/:/g, '')}`;
 
   return (
     <svg
@@ -40,6 +42,20 @@ export function BookCatMark({ className, animated = false, delay = 0, idle = fal
       aria-label={title}
       aria-hidden={title ? undefined : true}
     >
+      <defs>
+        {/* the right page is cut out of the cover → transparent page, the cat stays */}
+        <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="-10" width="160" height="130">
+          <rect x="0" y="-10" width="160" height="130" fill="#fff" />
+          <motion.path
+            d={OFFICIAL.rightPage}
+            fill="#000"
+            style={{ ...fill, originX: 0, originY: 0.5 }}
+            initial={play ? { scaleX: 0 } : false}
+            animate={{ scaleX: 1 }}
+            transition={t(0.6, 0.9)}
+          />
+        </mask>
+      </defs>
       <motion.g
         style={{ ...fill, originX: 0.5, originY: 1 }}
         animate={idle && !reduce ? { scale: [1, 1.012, 1] } : undefined}
@@ -49,6 +65,7 @@ export function BookCatMark({ className, animated = false, delay = 0, idle = fal
         <motion.path
           d={OFFICIAL.base}
           fill={LOGO_ORANGE}
+          mask={`url(#${maskId})`}
           style={{ ...fill, originX: 0.5, originY: 1 }}
           initial={play ? { scaleY: 0.2, opacity: 0 } : false}
           animate={{ scaleY: 1, opacity: 1 }}
@@ -62,15 +79,6 @@ export function BookCatMark({ className, animated = false, delay = 0, idle = fal
           initial={play ? { scaleX: 0 } : false}
           animate={{ scaleX: 1 }}
           transition={t(0.35, 0.8)}
-        />
-        {/* right white page opens — its cut-out reveals the cat */}
-        <motion.path
-          d={OFFICIAL.rightPage}
-          fill="#FFFFFF"
-          style={{ ...fill, originX: 0, originY: 0.5 }}
-          initial={play ? { scaleX: 0 } : false}
-          animate={{ scaleX: 1 }}
-          transition={t(0.6, 0.9)}
         />
         <motion.path d={OFFICIAL.ear} fill={LOGO_ORANGE} initial={play ? { opacity: 0 } : false} animate={{ opacity: 1 }} transition={t(1.3, 0.3)} />
         {/* tail highlight: appears after the cat, then glints */}

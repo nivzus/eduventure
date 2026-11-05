@@ -211,7 +211,7 @@ function Hero() {
 
           {/* stamp */}
           <motion.div style={{ x: p4.x, y: p4.y }} className="absolute bottom-[3%] right-[2%]">
-            <Stamp inView={false} delay={2.5} rotate={-14} className="bg-bg/40 text-[10px]">
+            <Stamp inView={false} delay={2.5} rotate={-14} className="text-[10px]">
               Səviyyə<br />B1<br />✓
             </Stamp>
           </motion.div>
