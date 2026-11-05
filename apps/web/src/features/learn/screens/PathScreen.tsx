@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ArrowRight, Check, Flag, Lock } from 'lucide-react';
@@ -17,6 +18,15 @@ const XS = [18, 72, 30, 78, 22, 66, 34, 74];
 
 export function PathScreen({ id }: { id: string }) {
   const { data: path, isLoading, isError } = usePath(id);
+  const mapRef = useRef<HTMLElement>(null);
+  const [W, setW] = useState(800);
+  useEffect(() => {
+    const el = mapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setW(el.clientWidth || 800));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [path]);
 
   if (isLoading) return <div className="mx-auto max-w-4xl px-4 py-10"><Skeleton className="h-[520px] rounded-3xl" /></div>;
   if (isError || !path) {
@@ -35,16 +45,20 @@ export function PathScreen({ id }: { id: string }) {
   const next = courses.find((c) => !c.completed);
   const STEP = 190;
   const TOP = 130; // room for the cat above the current waypoint
-  const H = TOP + Math.max(0, n - 1) * STEP + 130;
+  const H = TOP + Math.max(0, n - 1) * STEP + 200;
   const pts = courses.map((_, i) => ({ x: XS[i % XS.length], y: TOP + i * STEP }));
-  // smooth trail through the waypoints (viewBox 0..100 x 0..H)
-  const d = pts.reduce((acc, p, i) => {
-    if (i === 0) return `M ${p.x} ${p.y}`;
-    const prev = pts[i - 1];
+  const summit = { x: 86, y: H - 56 };
+  const trail = [...pts, summit];
+  // smooth trail through the waypoints up to the summit flag (viewBox 0..100 x 0..H)
+  const d = trail.reduce((acc, p, i) => {
+    const px = (p.x * W) / 100;
+    if (i === 0) return `M ${px} ${p.y}`;
+    const prev = trail[i - 1];
+    const ppx = (prev.x * W) / 100;
     const my = (prev.y + p.y) / 2;
-    return `${acc} C ${prev.x} ${my}, ${p.x} ${my}, ${p.x} ${p.y}`;
+    return `${acc} C ${ppx} ${my}, ${px} ${my}, ${px} ${p.y}`;
   }, '');
-  const progress = n ? (doneN === n ? 1 : (doneN + (next?.progress ?? 0)) / Math.max(1, n - 1)) : 0;
+  const progress = n ? Math.min(1, (doneN + (next?.progress ?? 0)) / n) : 0;
 
   return (
     <div className="mx-auto max-w-4xl px-4 pb-20 pt-8 sm:px-6">
@@ -67,10 +81,10 @@ export function PathScreen({ id }: { id: string }) {
       )}
 
       {/* Trail map */}
-      <section className="paper-dots relative mt-10 overflow-hidden rounded-3xl border-2 border-ink bg-sunken shadow-[6px_6px_0_0_var(--ink)]" style={{ height: H }}>
-        <svg viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" className="absolute inset-0 h-full w-full" aria-hidden>
-          <path d={d} stroke="var(--border-strong)" strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" fill="none" vectorEffect="non-scaling-stroke" />
-          <motion.path d={d} stroke="var(--signal)" strokeWidth="5" strokeLinecap="round" fill="none" vectorEffect="non-scaling-stroke"
+      <section ref={mapRef} className="paper-dots relative mt-10 overflow-hidden rounded-3xl border-2 border-ink bg-sunken shadow-[6px_6px_0_0_var(--ink)]" style={{ height: H }}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" aria-hidden>
+          <path d={d} stroke="var(--border-strong)" strokeWidth="3" strokeDasharray="2 9" strokeLinecap="round" fill="none" />
+          <motion.path d={d} stroke="var(--signal)" strokeWidth="5" strokeLinecap="round" fill="none"
             initial={{ pathLength: 0 }} whileInView={{ pathLength: Math.min(1, Math.max(0.001, progress)) }} viewport={{ once: true }} transition={{ duration: 1.6, ease: EASE }} />
         </svg>
 
@@ -121,9 +135,11 @@ export function PathScreen({ id }: { id: string }) {
           );
         })}
 
-        <div className="absolute bottom-4 right-5 flex items-center gap-2">
-          <Flag className="size-5 text-signal" />
-          <span className="hand text-2xl">zirvə</span>
+        <div className="absolute -translate-x-1/2 -translate-y-full text-center" style={{ left: `${summit.x}%`, top: summit.y + 14 }}>
+          <span className="mx-auto grid size-12 place-items-center rounded-full border-2 border-dashed border-ink bg-elev">
+            <Flag className="size-5 text-signal" />
+          </span>
+          <span className="hand mt-1 block text-2xl">zirvə</span>
         </div>
         {path.completed && <Stamp inView={false} tone="moss" rotate={-12} className="absolute right-6 top-6 text-[10px]">Yol<br />fəth edildi</Stamp>}
       </section>
