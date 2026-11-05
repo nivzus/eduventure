@@ -262,25 +262,49 @@ export interface CommentNode {
   parentId?: string | null;
   body: string;
   createdAt: string;
-  user?: AuthorLite | null;
+  user?: (AuthorLite & { role?: string; level?: number }) | null;
   replies?: CommentNode[];
   children?: CommentNode[];
 }
 
+/** Type-agnostic content card (bookmarks, search, assignments) — API `ContentSummary`. */
+export interface ContentSummary {
+  id: string;
+  type: ContentType;
+  title: string;
+  description?: string | null;
+  slug?: string;
+  category?: string | null;
+  coverUrl?: string | null;
+  coverColor?: string | null;
+  status?: ContentStatus;
+  visibility?: Visibility;
+  link?: string;
+  author?: { id: string; name: string } | null;
+  questionCount?: number;
+  readingMinutes?: number;
+  itemCount?: number;
+  courseCount?: number;
+  cardCount?: number;
+  locked?: boolean;
+}
+
 export interface Bookmark {
   id?: string;
+  userId?: string;
   contentType: ContentType;
   contentId: string;
   createdAt?: string;
-  content?: (ItemSummary & { coverUrl?: string | null; link?: string }) | null;
+  content?: ContentSummary | null;
+  locked?: boolean;
 }
 
 export interface SearchResults {
-  quizzes: (QuizLite & { description?: string | null })[];
-  articles: Article[];
-  courses: Course[];
-  paths: LearningPath[];
-  decks: Deck[];
+  quizzes: ContentSummary[];
+  articles: ContentSummary[];
+  courses: ContentSummary[];
+  paths: ContentSummary[];
+  decks: ContentSummary[];
 }
 
 export interface GroupLite {
