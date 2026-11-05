@@ -1,0 +1,63 @@
+'use client';
+
+import Link from 'next/link';
+import type { HTMLAttributes, ReactNode } from 'react';
+import { cn } from '@/lib/utils';
+import { SpotlightLayer, useSpotlight } from '@/components/motion/Spotlight';
+
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
+  /** cursor spotlight + 2px hover lift + stronger border */
+  interactive?: boolean;
+  /** inner padding (default true → p-6) */
+  padded?: boolean;
+  /** render as a Next <Link> (implies interactive) */
+  href?: string;
+  as?: 'div' | 'section' | 'article' | 'li' | 'aside';
+  /** spotlight color (CSS color/var), default signal */
+  glow?: string;
+  children?: ReactNode;
+}
+
+export const cardBase = 'relative isolate rounded-3xl border border-line bg-elev shadow-inner-hl';
+
+/**
+ * <Card>…</Card> · <Card interactive>…</Card> · <Card href="/quizzes/1" padded={false}>…</Card>
+ */
+export function Card({ interactive, padded = true, href, as = 'div', glow, className, children, onPointerMove, ...rest }: CardProps) {
+  const spot = useSpotlight();
+  const isInteractive = interactive || !!href;
+  const cls = cn(
+    cardBase,
+    padded && 'p-5 sm:p-6',
+    isInteractive &&
+      'group/spot transition-[transform,border-color,background-color] duration-300 ease-out-expo hover:-translate-y-0.5 hover:border-line-strong',
+    href && 'block focus-visible:outline-offset-4',
+    className,
+  );
+  const inner = (
+    <>
+      {isInteractive && <SpotlightLayer color={glow} />}
+      {children}
+    </>
+  );
+  const move = isInteractive
+    ? (e: React.PointerEvent<HTMLElement>) => {
+        spot(e);
+        onPointerMove?.(e as React.PointerEvent<HTMLDivElement>);
+      }
+    : onPointerMove;
+
+  if (href) {
+    return (
+      <Link href={href} className={cls} onPointerMove={move as React.PointerEventHandler<HTMLAnchorElement>} {...(rest as HTMLAttributes<HTMLAnchorElement>)}>
+        {inner}
+      </Link>
+    );
+  }
+  const Comp = as;
+  return (
+    <Comp className={cls} onPointerMove={move as React.PointerEventHandler<HTMLDivElement>} {...rest}>
+      {inner}
+    </Comp>
+  );
+}
