@@ -1,72 +1,81 @@
 @import 'tailwindcss';
 
 /* ───────────────────────────────────────────────────────────────
-   Eduventure 2.0 — "Night Expedition" design tokens
-   Dark is default. Light = "paper map".
+   Eduventure — "Səyahət dəftəri" (adventure notebook) design tokens
+   Light (paper) is default. Dark = "night desk under a lamp".
+   Brand oranges come from the book+cat logo: #D85810 / #F0A458.
    ─────────────────────────────────────────────────────────────── */
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 @custom-variant light (&:where([data-theme='light'], [data-theme='light'] *));
 
 :root,
-[data-theme='dark'] {
-  color-scheme: dark;
-  --bg: #0b0b10;
-  --bg-elev: #13131b;
-  --bg-sunken: #08080c;
-  --surface: #191923;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-
-  --fg: #f4f1ea;
-  --fg-muted: #a09daa;
-  --fg-subtle: #6b6878;
-
-  --signal: #ff8a1f; /* brand cat orange */
-  --signal-fg: #140a03;
-  --ember: #ffb547; /* amber/honey — second orange shade */
-  --glacier: #7ce7ff;
-  --aurora: #9b7bff;
-  --moss: #4ade80;
-  --danger: #ff4d6d;
-
-  --topo: rgba(244, 241, 234, 0.09);
-  --topo-strong: rgba(244, 241, 234, 0.18);
-  --glow: 0 0 0 1px rgba(255, 138, 31, 0.35), 0 10px 40px -10px rgba(255, 138, 31, 0.45);
-  --inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-  --shadow-pop: 0 24px 60px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.06);
-  --grain-opacity: 0.045;
-  --grain-blend: overlay;
-}
-
 [data-theme='light'] {
   color-scheme: light;
-  --bg: #f3eee3;
-  --bg-elev: #fbf8f1;
-  --bg-sunken: #ebe5d7;
+  --bg: #fbf6ec;          /* cream paper */
+  --bg-elev: #fffdf8;     /* fresh sheet */
+  --bg-sunken: #f3eadb;   /* kraft */
   --surface: #ffffff;
-  --border: rgba(20, 19, 26, 0.1);
-  --border-strong: rgba(20, 19, 26, 0.2);
+  --border: rgba(52, 38, 26, 0.13);
+  --border-strong: rgba(52, 38, 26, 0.28);
+  --ink: #2a1f17;         /* fountain-pen ink: hard outlines & offset shadows */
 
-  --fg: #14131a;
-  --fg-muted: #5d5a66;
-  --fg-subtle: #8a8694;
+  --fg: #2a1f17;
+  --fg-muted: #6c5d50;
+  --fg-subtle: #9a8b7c;
 
-  --signal: #f57c1f; /* brand cat orange */
-  --signal-fg: #1a0e05;
-  --ember: #c2410c; /* burnt orange */
-  --glacier: #0a8fb5;
-  --aurora: #6b4bff;
-  --moss: #15803d;
-  --danger: #d7263d;
+  --signal: #d4520e;      /* logo orange (darkened 4%) */
+  --signal-fg: #fffaf2;
+  --ember: #f0a458;       /* logo page orange — marker highlight */
+  --glacier: #2c7da0;     /* teal ink */
+  --aurora: #4c4cc9;      /* ballpoint blue */
+  --moss: #2f8a4f;        /* green pencil */
+  --danger: #d4283f;      /* red pen */
 
-  --topo: rgba(20, 19, 26, 0.1);
-  --topo-strong: rgba(20, 19, 26, 0.2);
-  --glow: 0 0 0 1px rgba(26, 26, 34, 0.25), 0 10px 30px -12px rgba(26, 26, 34, 0.45);
-  --inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
-  --shadow-pop: 0 24px 60px -24px rgba(40, 30, 10, 0.35), 0 0 0 1px rgba(20, 19, 26, 0.08);
-  --grain-opacity: 0.06;
+  --rule: rgba(76, 104, 170, 0.13);   /* notebook ruling / dot grid */
+  --margin-line: rgba(212, 40, 63, 0.32);
+  --topo: rgba(42, 31, 23, 0.11);
+  --topo-strong: rgba(42, 31, 23, 0.22);
+  --glow: 3px 3px 0 0 var(--ink);
+  --inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  --shadow-pop: 0 1px 0 rgba(42, 31, 23, 0.06), 0 18px 40px -18px rgba(42, 31, 23, 0.35);
+  --shadow-paper: 0 1px 0 rgba(42, 31, 23, 0.05), 0 10px 26px -16px rgba(42, 31, 23, 0.32);
+  --grain-opacity: 0.07;
   --grain-blend: multiply;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #1b1713;          /* walnut desk */
+  --bg-elev: #25201a;
+  --bg-sunken: #15120f;
+  --surface: #2d2720;
+  --border: rgba(246, 236, 222, 0.1);
+  --border-strong: rgba(246, 236, 222, 0.22);
+  --ink: #0d0b09;
+
+  --fg: #f6ecde;
+  --fg-muted: #bcae9c;
+  --fg-subtle: #877a6b;
+
+  --signal: #f07a2e;
+  --signal-fg: #1b1713;
+  --ember: #f6b46c;
+  --glacier: #6cc3e6;
+  --aurora: #a3a5ff;
+  --moss: #73d39a;
+  --danger: #ff6b7d;
+
+  --rule: rgba(246, 236, 222, 0.055);
+  --margin-line: rgba(255, 107, 125, 0.22);
+  --topo: rgba(246, 236, 222, 0.08);
+  --topo-strong: rgba(246, 236, 222, 0.16);
+  --glow: 3px 3px 0 0 var(--ink);
+  --inner: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  --shadow-pop: 0 24px 60px -20px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-paper: 0 1px 0 rgba(0, 0, 0, 0.3), 0 14px 30px -18px rgba(0, 0, 0, 0.8);
+  --grain-opacity: 0.06;
+  --grain-blend: overlay;
 }
 
 @theme inline {
@@ -89,20 +98,27 @@
   --color-moss: var(--moss);
   --color-danger: var(--danger);
   --color-topo: var(--topo);
+  --color-ink: var(--ink);
+  --color-rule: var(--rule);
 
-  --font-display: 'Unbounded Variable', 'Unbounded', ui-sans-serif, system-ui, sans-serif;
-  --font-sans: 'Manrope Variable', 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-display: 'Baloo 2 Variable', 'Baloo 2', ui-rounded, system-ui, sans-serif;
+  --font-brand: 'Quicksand Variable', 'Quicksand', ui-rounded, system-ui, sans-serif;
+  --font-sans: 'Nunito Variable', 'Nunito', ui-rounded, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Caveat Variable', 'Caveat', 'Segoe Print', cursive; /* "accent" = handwriting */
+  --font-hand: 'Caveat Variable', 'Caveat', 'Segoe Print', cursive;
   --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --shadow-glow: var(--glow);
   --shadow-inner-hl: var(--inner);
   --shadow-pop: var(--shadow-pop);
+  --shadow-paper: var(--shadow-paper);
+  --shadow-stamp: 3px 3px 0 0 var(--ink);
+  --shadow-stamp-sm: 2px 2px 0 0 var(--ink);
 }
 
 @theme {
   --radius-2xl: 14px;
-  --radius-3xl: 24px;
+  --radius-3xl: 20px;
   --radius-4xl: 32px;
 
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
@@ -151,29 +167,69 @@
 
 /* ── Utilities ─────────────────────────────────────────────── */
 
-/* Mono meta label: <span className="mono-label">Səviyyə 4</span> */
+/* Meta label = handwritten margin note: <span className="mono-label">Səviyyə 4</span> */
 @utility mono-label {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  line-height: 1.2;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--fg-subtle);
+  font-family: var(--font-hand);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--fg-muted);
+}
+
+/* Handwriting */
+@utility hand {
+  font-family: var(--font-hand);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Dot-grid notebook paper */
+@utility paper-dots {
+  background-image: radial-gradient(circle at 1px 1px, var(--rule) 1.2px, transparent 1.4px);
+  background-size: 22px 22px;
+}
+
+/* Ruled notebook page with red margin */
+@utility paper-ruled {
+  background-image:
+    linear-gradient(90deg, transparent 47px, var(--margin-line) 47px, var(--margin-line) 48.5px, transparent 48.5px),
+    repeating-linear-gradient(180deg, transparent 0 31px, var(--rule) 31px 32px);
+}
+
+/* Orange marker highlight behind text */
+@utility marker {
+  background: linear-gradient(104deg, transparent 0.4em, color-mix(in oklab, var(--ember) 70%, transparent) 0.5em 92%, transparent 97%);
+  background-size: 100% 0.62em;
+  background-position: 0 88%;
+  background-repeat: no-repeat;
+  padding: 0 0.12em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* Hard ink offset shadow ("sticker / stamp") */
+@utility stamp {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 0 var(--ink);
 }
 
 /* Display headline tracking */
 @utility display-tight {
   font-family: var(--font-display);
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  letter-spacing: -0.015em;
+  line-height: 0.98;
 }
 
 /* Serif italic accent word inside headlines */
 @utility serif-accent {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-family: var(--font-hand);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 1.12em;
+  letter-spacing: 0;
+  color: var(--signal);
 }
 
 /* Subtle topographic texture (static, css-only) */
@@ -222,17 +278,21 @@
 
   body {
     min-height: 100dvh;
-    background: var(--bg);
+    background-color: var(--bg);
+    background-image: radial-gradient(circle at 1px 1px, var(--rule) 1.15px, transparent 1.35px);
+    background-size: 22px 22px;
+    background-attachment: fixed;
     color: var(--fg);
     font-family: var(--font-sans);
-    font-feature-settings: 'ss01', 'cv11';
-    line-height: 1.55;
+    line-height: 1.6;
+    font-weight: 500;
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
-    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.04;
     text-wrap: balance;
   }
 
@@ -249,9 +309,6 @@
     outline: 2px solid var(--signal);
     outline-offset: 2px;
     border-radius: 6px;
-  }
-  [data-theme='light'] :focus-visible {
-    outline-color: var(--aurora);
   }
 
   button:not(:disabled),
@@ -320,13 +377,15 @@ body::after {
 .prose-ev h3 { font-size: 1.2rem; }
 .prose-ev a { color: var(--fg); text-decoration: underline; text-decoration-color: var(--signal); text-underline-offset: 3px; text-decoration-thickness: 2px; }
 .prose-ev strong { font-weight: 700; }
-.prose-ev em { font-family: var(--font-serif); font-size: 1.12em; }
+.prose-ev em { font-style: italic; }
+.prose-ev mark { background: none; }
+.prose-ev strong { background: linear-gradient(transparent 62%, color-mix(in oklab, var(--ember) 45%, transparent) 62%); }
 .prose-ev ul, .prose-ev ol { padding-left: 1.4em; }
 .prose-ev ul { list-style: disc; }
 .prose-ev ol { list-style: decimal; }
 .prose-ev li + li { margin-top: 0.4em; }
 .prose-ev li::marker { color: var(--fg-subtle); }
-.prose-ev blockquote { border-left: 2px solid var(--signal); padding-left: 1em; color: var(--fg-muted); font-family: var(--font-serif); font-style: italic; font-size: 1.25em; }
+.prose-ev blockquote { border-left: 3px solid var(--signal); padding: .2em 0 .2em 1em; color: var(--fg); font-family: var(--font-hand); font-weight: 600; font-size: 1.6em; line-height: 1.25; }
 .prose-ev code { font-family: var(--font-mono); font-size: 0.88em; background: var(--surface); border: 1px solid var(--border); padding: 0.1em 0.4em; border-radius: 6px; }
 .prose-ev pre { background: var(--bg-sunken); border: 1px solid var(--border); border-radius: 16px; padding: 1em 1.2em; overflow-x: auto; }
 .prose-ev pre code { background: none; border: 0; padding: 0; }
@@ -334,7 +393,7 @@ body::after {
 .prose-ev img { border-radius: 16px; border: 1px solid var(--border); }
 .prose-ev table { width: 100%; border-collapse: collapse; font-size: 0.95em; }
 .prose-ev th, .prose-ev td { border-bottom: 1px solid var(--border); padding: 0.6em 0.8em; text-align: left; }
-.prose-ev th { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--fg-subtle); font-weight: 500; }
+.prose-ev th { font-family: var(--font-hand); font-size: 1.2em; color: var(--fg-muted); font-weight: 700; }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {

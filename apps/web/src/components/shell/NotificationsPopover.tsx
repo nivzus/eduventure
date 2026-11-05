@@ -51,7 +51,7 @@ export function NotificationsPopover() {
           <div className="flex items-center justify-between border-b border-line px-5 py-4">
             <div>
               <p className="font-display text-base font-semibold">Bildirişlər</p>
-              <p className="mono-label mt-1 text-[10px]">{count > 0 ? `${count} oxunmamış` : 'hamısı oxunub'}</p>
+              <p className="mono-label mt-1 !text-[14px]">{count > 0 ? `${count} oxunmamış` : 'hamısı oxunub'}</p>
             </div>
             <button
               type="button"
@@ -96,7 +96,7 @@ export function NotificationsPopover() {
                       <span className="min-w-0 flex-1">
                         <span className={cn('block text-sm leading-snug', n.readAt ? 'text-muted' : 'font-semibold text-fg')}>{n.title}</span>
                         {n.body && <span className="mt-0.5 line-clamp-2 block text-[13px] text-muted">{n.body}</span>}
-                        <span className="mono-label mt-1.5 block text-[10px]">{formatRelative(n.createdAt)}</span>
+                        <span className="mono-label mt-1.5 block !text-[14px]">{formatRelative(n.createdAt)}</span>
                       </span>
                     </button>
                   </motion.li>

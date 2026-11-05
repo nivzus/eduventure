@@ -8,9 +8,9 @@ import { ArrowRight } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { ApiError } from '@/lib/api';
 import { Button, Field, Input } from '@/components/ui';
-import { TopoBackground, KineticText } from '@/components/motion';
 import { Logo } from '@/components/shell';
-import { Mascot } from '@/components/brand/Mascot';
+import { BookCatMark } from '@/components/brand/BookCat';
+import { Highlight, Note, Scribble } from '@/components/notebook';
 
 type Mode = 'login' | 'register';
 
@@ -61,25 +61,23 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   return (
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
-      {/* Art side */}
-      <aside className="relative hidden overflow-hidden border-r border-line bg-sunken lg:flex lg:flex-col lg:justify-between lg:p-10">
-        <TopoBackground variant="summit" animated highlight intensity={1} className="absolute inset-0" />
-        <div className="pointer-events-none absolute -left-32 top-1/3 size-[520px] rounded-full bg-signal/20 blur-[120px]" />
+      {/* Art side — an open notebook page */}
+      <aside className="relative hidden overflow-hidden border-r-2 border-ink bg-elev paper-ruled lg:flex lg:flex-col lg:justify-between lg:p-10 lg:pl-20">
         <Logo className="relative" />
         <div className="relative">
-          <span className="mono-label !text-signal">{isLogin ? 'Xoş gəldin, səyyah' : 'Ekspedisiyaya qoşul'}</span>
-          <KineticText
-            as="h2"
-            text={isLogin ? 'Zirvə səni *gözləyir*' : 'Hər söz yeni bir *zirvədir*'}
-            className="mt-4 max-w-md font-display text-5xl font-semibold leading-[1.02] tracking-[-0.03em]"
-          />
-          <p className="mt-5 max-w-sm text-muted">
-            Testlər, kurslar, fləşkartlar və hər gün yeni XP — ingilis dilini birlikdə öyrənək.
-          </p>
+          <Note className="text-[28px] !text-signal" rotate={-3}>{isLogin ? 'Xoş gəldin, səyyah!' : 'Yeni səhifə açırıq'}</Note>
+          <h2 className="mt-4 max-w-md font-display text-5xl font-semibold leading-[1.02]">
+            {isLogin ? (
+              <>Dəftərin səni <Highlight inView={false} delay={0.6}>gözləyir</Highlight></>
+            ) : (
+              <>Hər söz — yeni <Scribble inView={false} delay={0.6}>səhifə</Scribble></>
+            )}
+          </h2>
+          <p className="mt-5 max-w-sm text-lg text-muted">Testlər, kurslar, fləşkartlar və hər gün yeni XP — ingilis dilini birlikdə öyrənək.</p>
         </div>
         <div className="relative flex items-end justify-between">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-subtle">40.4093° N · 49.8671° E</span>
-          <Mascot mode="peek" size={150} />
+          <span className="hand text-2xl text-subtle">— Sədaqət müəllim</span>
+          <BookCatMark animated idle delay={0.2} className="h-44 w-auto" />
         </div>
       </aside>
 
@@ -94,18 +92,18 @@ export function AuthForm({ mode }: { mode: Mode }) {
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
           className="w-full max-w-[400px]"
         >
-          <span className="mono-label">{isLogin ? '01 — Giriş' : '01 — Qeydiyyat'}</span>
+          <span className="hand text-2xl text-signal">{isLogin ? 'giriş' : 'qeydiyyat'}</span>
           <h1 className="mt-3 font-display text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
             {isLogin ? 'Hesabına daxil ol' : 'Hesab yarat'}
           </h1>
           <p className="mt-2 text-muted">
             {isLogin ? 'Hesabın yoxdur? ' : 'Artıq hesabın var? '}
-            <Link href={isLogin ? '/register' : '/login'} className="font-semibold text-fg underline decoration-signal decoration-2 underline-offset-4">
+            <Link href={isLogin ? '/register' : '/login'} className="font-bold text-signal underline decoration-wavy decoration-signal/60 decoration-2 underline-offset-4">
               {isLogin ? 'Qeydiyyatdan keç' : 'Daxil ol'}
             </Link>
           </p>
 
-          <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5">
+          <form onSubmit={onSubmit} noValidate className="mt-8 space-y-5 rounded-3xl border-2 border-ink bg-elev p-6 shadow-[5px_5px_0_0_var(--ink)] sm:p-7">
             {!isLogin && (
               <Field label="Ad, soyad" htmlFor="name" error={errors.name}>
                 <Input id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Aysel Məmmədova" />

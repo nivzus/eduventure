@@ -1,6 +1,6 @@
 # Eduventure 2.0 — Shared Spec (single source of truth for all agents)
 
-Old project (CRA + Supabase) lives in `legacy/` — read it to understand features (main logic in `legacy/src/App.js`, pages in `legacy/src/pages/*`). UI language: **Azerbaijani** (same copy tone as legacy; ə, ğ, ı, ö, ü, ş, ç must render). Brand: **Eduventure** ("İngilis dilini birlikdə öyrənək" — English-learning platform by teacher **Sədaqət Ağayeva** ("Seda"). **Brand mascot = the orange cat** (legacy `WavingCat.js`): the logo features the cat; `Mascot`/`MascotPeek` from `@/components/brand` appear in empty states, results (celebrate/sad), onboarding and peek in from the bottom-right with Azerbaijani motivational bubbles.
+Old project (CRA + Supabase) was removed from the tree; it is preserved in git tag `legacy-v1` (main logic in `src/App.js`, pages in `src/pages/*`). UI language: **Azerbaijani** (same copy tone as legacy; ə, ğ, ı, ö, ü, ş, ç must render). Brand: **Eduventure** ("İngilis dilini birlikdə öyrənək" — English-learning platform by teacher **Sədaqət Ağayeva** ("Seda"). **Brand mascot = the orange cat** (see official logo `apps/web/public/brand/eduventure-logo.png`): the logo features the cat; `Mascot`/`MascotPeek` from `@/components/brand` appear in empty states, results (celebrate/sad), onboarding and peek in from the bottom-right with Azerbaijani motivational bubbles.
 
 Monorepo:
 ```
@@ -13,7 +13,15 @@ Next rewrites `/api/:path*` → `http://localhost:4000/api/:path*` (env `API_URL
 **Git: agents must NOT run git add/commit/push/checkout.** The lead commits.
 
 ---
-## 1. Design concept — "Night Expedition"
+## 1. Design concept — "Səyahət dəftəri" (adventure notebook) — CURRENT
+
+> Supersedes the old "Night Expedition" notes below where they conflict.
+- Paper-first (light default): cream dot-grid paper, ruled pages with red margin, hand-drawn marker underlines/circles/arrows (`@/components/notebook`: Scribble, Highlight, CircleMark, HandArrow, Tape, Stamp, Note, PaperScrap), sticker/stamp buttons (2px ink border + hard offset shadow that "presses").
+- Brand: official book+cat logo, vectorised in `@/components/brand/BookCat` (`BookCatMark` with opening animation, `LogoCat`, `LogoLockup`); mascot = the logo cat (`Mascot`, `MascotPeek`). Oranges #D85810 / #F0A458.
+- Fonts (all verified to contain Ə ə Ğ ğ İ ı Ş ş Ç ç Ö ö Ü ü): **Baloo 2** (display), **Quicksand** (brand wordmark, `font-brand`), **Nunito** (body), **Caveat** (handwriting, `hand`, `mono-label`, `serif-accent`), **JetBrains Mono** (numbers/timers). Do NOT use Fredoka/Manrope/Rubik/Outfit/Sora — they lack ə.
+- Motion: pen-draw (pathLength) for scribbles/arrows/routes, stamp "thud" springs, 3D page flips (scroll-driven on landing), flashcard flips, mouse-parallax paper scraps.
+
+## 1b. Original concept — "Night Expedition" (historical)
 
 Learning = an expedition. Topographic contour lines, trails with waypoints, altitude = XP, summit flag = completion. Editorial typography + bold signal color on deep ink. Not a generic SaaS dashboard: asymmetric bento grids, oversized display type, mono meta-labels, generous negative space, tactile micro-motion.
 

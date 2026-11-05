@@ -61,7 +61,7 @@ export function Rail({ collapsed, onToggle }: { collapsed: boolean; onToggle: ()
               {collapsed ? (
                 gi > 0 ? <span className="h-px w-5 bg-line-strong" /> : null
               ) : (
-                <span className="mono-label text-[10px]">{g.label}</span>
+                <span className="mono-label !text-[15px]">{g.label}</span>
               )}
             </div>
             <ul className="flex flex-col gap-0.5">
@@ -165,7 +165,7 @@ function RailAltimeter({ collapsed }: { collapsed: boolean }) {
   return (
     <div className="m-3 rounded-2xl border border-line bg-elev/70 p-3.5">
       <div className="flex items-center justify-between">
-        <span className="mono-label flex items-center gap-1.5 text-[10px]">
+        <span className="mono-label flex items-center gap-1.5 !text-[15px]">
           <Mountain className="size-3.5 text-aurora" /> Hündürlük
         </span>
         <span className="flex items-center gap-1 font-mono text-[11px] font-semibold text-ember">

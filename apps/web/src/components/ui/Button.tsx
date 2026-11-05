@@ -10,26 +10,28 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'dan
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 const base =
-  'group/btn relative inline-flex select-none items-center justify-center whitespace-nowrap font-semibold tracking-[-0.01em] ' +
-  'transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-200 ease-out-expo ' +
-  'active:scale-[0.97] disabled:pointer-events-none disabled:opacity-45 aria-disabled:pointer-events-none aria-disabled:opacity-45 ' +
+  'group/btn relative inline-flex select-none items-center justify-center whitespace-nowrap font-display font-semibold tracking-[0.005em] ' +
+  'transition-[transform,background-color,border-color,color,box-shadow,opacity] duration-150 ease-out-expo ' +
+  'disabled:pointer-events-none disabled:opacity-45 aria-disabled:pointer-events-none aria-disabled:opacity-45 ' +
   'focus-visible:outline-2 focus-visible:outline-offset-2';
 
+/* Sticker/stamp buttons: ink outline + hard offset shadow that "presses" on click. */
+const press =
+  'border-2 border-ink shadow-stamp hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_0_var(--ink)] ' +
+  'active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0_0_var(--ink)]';
+
 const variants: Record<ButtonVariant, string> = {
-  primary:
-    'overflow-hidden bg-signal text-signal-fg shadow-[inset_0_1px_0_rgba(255,255,255,.45),0_1px_2px_rgba(0,0,0,.25)] hover:shadow-glow ' +
-    "before:pointer-events-none before:absolute before:inset-y-0 before:-left-1/2 before:w-1/2 before:skew-x-[-20deg] before:bg-gradient-to-r before:from-transparent before:via-white/45 before:to-transparent before:opacity-0 before:content-[''] " +
-    'hover:before:animate-[sheen_0.9s_var(--ease-out-expo)] hover:before:opacity-100',
-  secondary: 'border border-line bg-surface text-fg shadow-inner-hl hover:border-line-strong hover:bg-[color-mix(in_oklab,var(--surface)_88%,var(--fg))]',
-  ghost: 'text-muted hover:bg-fg/[0.06] hover:text-fg',
-  outline: 'border border-line-strong text-fg hover:border-fg/40 hover:bg-fg/[0.04]',
-  danger: 'bg-danger text-white shadow-[inset_0_1px_0_rgba(255,255,255,.25)] hover:brightness-110',
+  primary: `bg-signal text-signal-fg ${press}`,
+  secondary: `bg-elev text-fg ${press}`,
+  ghost: 'text-muted hover:bg-fg/[0.06] hover:text-fg active:scale-[0.97]',
+  outline: 'border-2 border-dashed border-line-strong text-fg hover:border-ink hover:bg-fg/[0.03] active:scale-[0.97]',
+  danger: `bg-danger text-white ${press}`,
 };
 
 const sizes: Record<ButtonSize, string> = {
   sm: 'h-9 gap-1.5 rounded-xl px-3.5 text-[13px]',
-  md: 'h-11 gap-2 rounded-2xl px-5 text-sm',
-  lg: 'h-14 gap-2.5 rounded-2xl px-7 text-[15px]',
+  md: 'h-11 gap-2 rounded-[14px] px-5 text-[15px]',
+  lg: 'h-14 gap-2.5 rounded-2xl px-7 text-[17px]',
 };
 
 const iconSize: Record<ButtonSize, number> = { sm: 15, md: 17, lg: 19 };

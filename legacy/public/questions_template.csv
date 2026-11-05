@@ -1,7 +1,0 @@
-text,type,options,correctAnswers,explanation,points
-"Paytaxt hansı şəhərdir?","single","Bakı;Gəncə;Sumqayıt","Bakı","Azərbaycanın paytaxtı Bakıdır.",1
-"Hansı dillər proqramlaşdırma dilləridir?","multiple","HTML;CSS;JavaScript;Java","JavaScript;Java","HTML və CSS proqramlaşdırma deyil, işarələmə dilləridir.",2
-"React kitabxanası kim tərəfindən yaradılıb?","textInput","","Facebook","React Facebook (indiki Meta) tərəfindən yaradılıb.",1
-"JavaScript interpretasiya olunan dildir.","trueFalse","","true","JavaScript brauzer tərəfindən birbaşa interpretasiya olunur.",1
-"Prosesləri düzgün sıralayın.","ordering","Tələblərin toplanması;Dizayn;Kodlaşdırma;Testləşdirmə;Tətbiq","","Proqram təminatının həyat dövrünün əsas mərhələləri.",5
-"CSS-də 'specificity' nə deməkdir?","open","","","CSS-də selectorların hansının daha üstün olduğunu müəyyən edən qaydalar toplusudur.",10

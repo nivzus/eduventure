@@ -1,10 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import '@fontsource-variable/unbounded';
-import '@fontsource-variable/manrope';
+import '@fontsource-variable/baloo-2';
+import '@fontsource-variable/quicksand';
+import '@fontsource-variable/nunito';
+import '@fontsource-variable/nunito/wght-italic.css';
+import '@fontsource-variable/caveat';
 import '@fontsource-variable/jetbrains-mono';
-import '@fontsource/instrument-serif/400.css';
-import '@fontsource/instrument-serif/400-italic.css';
 import './globals.css';
 import { Providers } from '@/lib/providers';
 import { themeInitScript } from '@/lib/theme';
@@ -17,14 +18,14 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#0b0b10' },
-    { media: '(prefers-color-scheme: light)', color: '#f3eee3' },
+    { media: '(prefers-color-scheme: light)', color: '#fbf6ec' },
+    { media: '(prefers-color-scheme: dark)', color: '#1b1713' },
   ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="az" data-theme="dark" suppressHydrationWarning>
+    <html lang="az" data-theme="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>

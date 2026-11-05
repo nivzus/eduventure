@@ -20,7 +20,7 @@
 - [Layihə strukturu](#layihə-strukturu)
 - [Skriptlər](#skriptlər)
 - [Deploy](#deploy)
-- [Köhnə versiya (legacy/)](#köhnə-versiya-legacy)
+- [Köhnə versiya](#köhnə-versiya)
 - [English](#english)
 
 ---
@@ -193,7 +193,6 @@ Brauzerdə <http://localhost:3000> açın. API ayrıca: `npm run dev:api`, web a
 │       ├── src/lib/              api klienti, auth, tiplər, utils
 │       └── Dockerfile
 ├── docs/                         SPEC.md · ARCHITECTURE.md · DEPLOY.md
-├── legacy/                       köhnə CRA + Supabase versiyası (yalnız istinad üçün)
 ├── .github/                      CI workflow + Dependabot
 ├── docker-compose.yml            dev: yalnız PostgreSQL
 ├── docker-compose.prod.yml       db + api + web
@@ -231,15 +230,15 @@ Tövsiyə olunan topologiya: **Vercel** (web) + **Render / Railway / Fly.io** (A
 
 Addım-addım təlimat: [docs/DEPLOY.md](docs/DEPLOY.md).
 
-## Köhnə versiya (legacy/)
+## Köhnə versiya
 
-İlkin Create React App + Supabase versiyası (GitHub Pages-də yayımlanan) `legacy/` qovluğunda saxlanılıb. O, yalnız funksionallığı müqayisə etmək üçün istinaddır, yeni CI tərəfindən build edilmir və yeni tətbiqlə əlaqəli deyil.
+İlkin Create React App + Supabase versiyası koddan silinib və git-də `legacy-v1` tegi ilə saxlanılıb (`git checkout legacy-v1`). O, yalnız funksionallığı müqayisə etmək üçün istinaddır, yeni CI tərəfindən build edilmir və yeni tətbiqlə əlaqəli deyil.
 
 ---
 
 ## English
 
-**Eduventure** is an English-learning LMS for Azerbaijani speakers (UI in Azerbaijani), created by English teacher Sədaqət Ağayeva ("Seda"). Version 2.0 rewrites the original CRA + Supabase app (kept in [`legacy/`](legacy/)) as a monorepo:
+**Eduventure** is an English-learning LMS for Azerbaijani speakers (UI in Azerbaijani), created by English teacher Sədaqət Ağayeva ("Seda"). Version 2.0 rewrites the original CRA + Supabase app (kept in git tag `legacy-v1`) as a monorepo:
 
 - `apps/api` — **NestJS 11 + Prisma 6 + PostgreSQL 16**, port `4000`, global prefix `/api`, httpOnly cookie auth (15-min access + 30-day refresh JWT with token versioning).
 - `apps/web` — **Next.js 15 App Router + Tailwind v4 + motion**, port `3000`; rewrites `/api/*` to `API_URL`, so the browser is same-origin with the API.

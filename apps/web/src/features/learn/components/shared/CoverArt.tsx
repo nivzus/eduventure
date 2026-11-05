@@ -74,8 +74,8 @@ export function CoverArt({ seed, tone, toneKey, coverUrl, alt = '', className, m
           </svg>
           {meta && (
             <>
-              <span className="mono-label absolute bottom-3 left-3 !text-[10px] opacity-80">{coordsOf(seed)}</span>
-              <span className="mono-label absolute top-3 right-3 !text-[10px]" style={{ color }}>
+              <span className="mono-label absolute bottom-3 left-3 !text-[15px] opacity-80">{coordsOf(seed)}</span>
+              <span className="mono-label absolute top-3 right-3 !text-[15px]" style={{ color }}>
                 ▲ {grouped(altitudeOf(seed))} m
               </span>
             </>

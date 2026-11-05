@@ -18,7 +18,7 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
 }
 
-export const cardBase = 'relative isolate rounded-3xl border border-line bg-elev shadow-inner-hl';
+export const cardBase = 'relative isolate rounded-3xl border border-line bg-elev shadow-paper';
 
 /**
  * <Card>…</Card> · <Card interactive>…</Card> · <Card href="/quizzes/1" padded={false}>…</Card>
@@ -30,7 +30,7 @@ export function Card({ interactive, padded = true, href, as = 'div', glow, class
     cardBase,
     padded && 'p-5 sm:p-6',
     isInteractive &&
-      'group/spot transition-[transform,border-color,background-color] duration-300 ease-out-expo hover:-translate-y-0.5 hover:border-line-strong',
+      'group/spot transition-[transform,border-color,background-color,box-shadow] duration-300 ease-out-expo hover:-translate-y-1 hover:rotate-[-0.35deg] hover:border-ink/60 hover:shadow-[4px_5px_0_0_var(--ink)]',
     href && 'block focus-visible:outline-offset-4',
     className,
   );

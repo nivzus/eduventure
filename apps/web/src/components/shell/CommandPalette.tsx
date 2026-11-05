@@ -219,7 +219,7 @@ export function CommandPalette() {
                   const isActive = i === active;
                   return (
                     <div key={c.id}>
-                      {header && <div className="mono-label px-3 pb-1.5 pt-3 text-[10px]">{header}</div>}
+                      {header && <div className="mono-label px-3 pb-1.5 pt-3 !text-[15px]">{header}</div>}
                       <button
                         type="button"
                         id={`cmdk-${c.id}`}
