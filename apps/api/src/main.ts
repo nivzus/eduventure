@@ -29,7 +29,15 @@ async function bootstrap() {
 
   const dir = uploadDir();
   mkdirSync(dir, { recursive: true });
-  app.useStaticAssets(dir, { prefix: '/api/uploads', maxAge: '7d' });
+  app.useStaticAssets(dir, {
+    prefix: '/api/uploads',
+    maxAge: '7d',
+    // uploaded SVGs must never run scripts when opened directly
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self' data:; style-src 'unsafe-inline'; sandbox");
+    },
+  });
 
   app.enableShutdownHooks();
   const port = Number(process.env.PORT ?? 4000);

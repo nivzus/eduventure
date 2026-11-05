@@ -11,11 +11,15 @@ import type {
   AdminQuest,
   AdminUser,
   GroupStatsData,
+  GroupStatsView,
+  OverviewView,
   PermissionRow,
   PickableContent,
   QuizStatsData,
+  QuizStatsView,
   StatsOverviewData,
 } from './types';
+import { groupStatsFrom, normalizeGroupStats, normalizeOverview, normalizeQuizStats, overviewFrom, quizStatsFrom } from './lib/derive';
 
 export const ak = {
   overview: ['admin', 'overview'] as const,
@@ -34,22 +38,77 @@ export const ak = {
 
 /* ─────────── stats ─────────── */
 
+async function allAttempts(params: { quizId?: string; userId?: string } = {}) {
+  return asList<AdminAttempt>(await api.get<unknown>('/attempts', { ...params, limit: 500 }));
+}
+
+/** GET /stats/overview, falling back to a client-side computation from /users, /quizzes and /attempts. */
 export function useStatsOverview() {
-  return useQuery({ queryKey: ak.overview, queryFn: () => api.get<StatsOverviewData>('/stats/overview') });
+  return useQuery({
+    queryKey: ak.overview,
+    queryFn: async (): Promise<OverviewView> => {
+      try {
+        return normalizeOverview(await api.get<StatsOverviewData>('/stats/overview'));
+      } catch {
+        const [users, quizzes, attempts] = await Promise.allSettled([
+          api.get<unknown>('/users').then((v) => asList<AdminUser>(v)),
+          api.get<unknown>('/quizzes').then((v) => asList<{ id: string; title: string }>(v)),
+          allAttempts(),
+        ]);
+        if (attempts.status === 'rejected') throw attempts.reason;
+        return overviewFrom({
+          users: users.status === 'fulfilled' ? users.value : null,
+          quizzes: quizzes.status === 'fulfilled' ? quizzes.value : null,
+          attempts: attempts.value,
+        });
+      }
+    },
+  });
 }
 
+type QuizWithQuestions = { id: string; title: string; passPercent?: number; category?: string | null; questions?: { id: string; text: string; type: string; points?: number }[] };
+
+export function useQuizDetail(id: string) {
+  return useQuery({ queryKey: ['admin', 'quiz', id], queryFn: () => api.get<QuizWithQuestions>(`/quizzes/${id}`), enabled: !!id, staleTime: 60_000 });
+}
+
+/** GET /stats/quizzes/:id, falling back to /quizzes/:id + /attempts?quizId. */
 export function useQuizStats(id: string) {
-  return useQuery({ queryKey: ak.quizStats(id), queryFn: () => api.get<QuizStatsData>(`/stats/quizzes/${id}`), enabled: !!id });
+  return useQuery({
+    queryKey: ak.quizStats(id),
+    queryFn: async (): Promise<QuizStatsView> => {
+      try {
+        return normalizeQuizStats(await api.get<QuizStatsData>(`/stats/quizzes/${id}`));
+      } catch {
+        const [quiz, attempts] = await Promise.all([api.get<QuizWithQuestions>(`/quizzes/${id}`), allAttempts({ quizId: id })]);
+        return quizStatsFrom(quiz, attempts);
+      }
+    },
+    enabled: !!id,
+    retry: false,
+  });
 }
 
-export function useGroupStats(id: string) {
-  return useQuery({ queryKey: ak.groupStats(id), queryFn: () => api.get<GroupStatsData>(`/stats/groups/${id}`), enabled: !!id, retry: false });
+/** GET /stats/groups/:id, falling back to member attempts. */
+export function useGroupStats(id: string, memberIds: string[] | undefined) {
+  return useQuery({
+    queryKey: [...ak.groupStats(id), memberIds?.length ?? 0],
+    queryFn: async (): Promise<GroupStatsView> => {
+      try {
+        return normalizeGroupStats(await api.get<GroupStatsData>(`/stats/groups/${id}`));
+      } catch {
+        return groupStatsFrom(memberIds ?? [], await allAttempts());
+      }
+    },
+    enabled: !!id && id !== 'new' && !!memberIds,
+    retry: false,
+  });
 }
 
 export function useAttempts(params: { quizId?: string; userId?: string }) {
   return useQuery({
     queryKey: ak.attempts(params.quizId, params.userId),
-    queryFn: async () => asList<AdminAttempt>(await api.get<unknown>('/attempts', { quizId: params.quizId, userId: params.userId })),
+    queryFn: () => allAttempts({ quizId: params.quizId, userId: params.userId }),
     placeholderData: keepPreviousData,
   });
 }
@@ -282,9 +341,36 @@ export function useSetVisibility() {
   });
 }
 
-/** Fetch several quiz stats in parallel (used by analytics list sparklines). */
+/** Per-quiz stats for a list; each entry falls back to /attempts computation. */
 export function useManyQuizStats(ids: string[]) {
   return useQueries({
-    queries: ids.map((id) => ({ queryKey: ak.quizStats(id), queryFn: () => api.get<QuizStatsData>(`/stats/quizzes/${id}`), staleTime: 60_000 })),
+    queries: ids.map((id) => ({
+      queryKey: ak.quizStats(id),
+      queryFn: async (): Promise<QuizStatsView> => {
+        try {
+          return normalizeQuizStats(await api.get<QuizStatsData>(`/stats/quizzes/${id}`));
+        } catch {
+          const [quiz, attempts] = await Promise.all([api.get<QuizWithQuestions>(`/quizzes/${id}`), allAttempts({ quizId: id })]);
+          return quizStatsFrom(quiz, attempts);
+        }
+      },
+      staleTime: 60_000,
+      retry: false,
+    })),
   });
+}
+
+export interface AdminQuizRow {
+  id: string;
+  title: string;
+  category?: string | null;
+  status?: string;
+  passPercent?: number;
+  questionCount?: number;
+  attemptsCount?: number;
+  author?: { id: string; name: string } | null;
+}
+
+export function useAdminQuizzes() {
+  return useQuery({ queryKey: ['admin', 'quizzes'], queryFn: async () => asList<AdminQuizRow>(await api.get<unknown>('/quizzes')), staleTime: 30_000 });
 }

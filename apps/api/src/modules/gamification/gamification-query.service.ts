@@ -156,7 +156,8 @@ export class GamificationQueryService {
   private validateRule(rule: unknown): Prisma.InputJsonValue {
     if (rule === undefined || rule === null) return {};
     if (typeof rule !== 'object' || Array.isArray(rule)) throw new BadRequestException('rule obyekt olmalıdır');
-    const r = rule as Record<string, unknown>;
+    const r = { ...(rule as Record<string, unknown>) };
+    if (r.type !== undefined) r.type = String(r.type).toLowerCase();
     if (r.type !== undefined && !RULE_TYPES.includes(String(r.type))) {
       throw new BadRequestException(`rule.type bunlardan biri olmalıdır: ${RULE_TYPES.join(', ')}`);
     }

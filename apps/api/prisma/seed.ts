@@ -1,6 +1,7 @@
 /* Eduventure demo seed — idempotent-ish: wipes content tables, then recreates demo data. */
 import { PrismaClient, Prisma, QuestionType } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { gradeQuestion, summarize, viewQuestion, type QuestionResult, type ViewQuestion } from '../src/modules/quizzes/question-engine';
 
 const prisma = new PrismaClient();
 const daysAgo = (d: number) => new Date(Date.now() - d * 86_400_000);
@@ -119,7 +120,7 @@ async function main() {
     students.push(await prisma.user.create({ data: { email: `student${i + 1}@eduventure.az`, name, passwordHash: pw, lastActiveAt: daysAgo(i % 4) } }));
   }
 
-  const quizzes = [];
+  const quizzes: Prisma.QuizGetPayload<{ include: { questions: true } }>[] = [];
   for (const q of QUIZZES) {
     quizzes.push(
       await prisma.quiz.create({
@@ -183,12 +184,12 @@ async function main() {
   await prisma.assignment.create({ data: { contentType: 'COURSE', contentId: course.id, title: course.title, groupId: group.id, dueAt: daysAgo(-12), assignedById: seda.id } });
 
   await prisma.achievement.createMany({ data: [
-    { code: 'first-quiz', title: 'İlk addım', description: 'İlk testini tamamla', icon: 'Footprints', xpReward: 10, rule: { type: 'QUIZZES', count: 1 } },
-    { code: 'perfect', title: 'Mükəmməl zirvə', description: 'Testdən 100% topla', icon: 'Mountain', xpReward: 30, rule: { type: 'PERFECT', count: 1 } },
-    { code: 'quiz-10', title: 'Yorulmaz səyyah', description: '10 test tamamla', icon: 'Compass', xpReward: 50, rule: { type: 'QUIZZES', count: 10 } },
-    { code: 'reader', title: 'Kitab qurdu', description: '5 məqalə oxu', icon: 'BookOpen', xpReward: 25, rule: { type: 'ARTICLES', count: 5 } },
-    { code: 'streak-7', title: 'Həftəlik od', description: '7 günlük seriya', icon: 'Flame', xpReward: 40, rule: { type: 'STREAK', count: 7 } },
-    { code: 'cards-100', title: 'Kart ustası', description: '100 kart təkrarla', icon: 'Layers', xpReward: 40, rule: { type: 'CARDS', count: 100 } },
+    { code: 'first-quiz', title: 'İlk addım', description: 'İlk testini tamamla', icon: 'Footprints', xpReward: 10, rule: { type: 'quizzes', count: 1 } },
+    { code: 'perfect', title: 'Mükəmməl zirvə', description: 'Testdən 100% topla', icon: 'Mountain', xpReward: 30, rule: { type: 'perfect', count: 1 } },
+    { code: 'quiz-10', title: 'Yorulmaz səyyah', description: '10 test tamamla', icon: 'Compass', xpReward: 50, rule: { type: 'quizzes', count: 10 } },
+    { code: 'reader', title: 'Kitab qurdu', description: '5 məqalə oxu', icon: 'BookOpen', xpReward: 25, rule: { type: 'articles', count: 5 } },
+    { code: 'streak-7', title: 'Həftəlik od', description: '7 günlük seriya', icon: 'Flame', xpReward: 40, rule: { type: 'streak', days: 7 } },
+    { code: 'cards-100', title: 'Kart ustası', description: '100 kart təkrarla', icon: 'Layers', xpReward: 40, rule: { type: 'cards', count: 100 } },
   ] });
   await prisma.quest.createMany({ data: [
     { title: 'Gündə 1 test', description: 'Bu gün bir test tamamla', type: 'COMPLETE_QUIZZES', target: 1, xpReward: 15, period: 'DAILY' },
@@ -197,30 +198,110 @@ async function main() {
     { title: '200 XP qazan', type: 'EARN_XP', target: 200, xpReward: 50, period: 'WEEKLY' },
   ] });
 
-  // attempt history + XP so dashboards/leaderboards look alive
-  for (const s of students) {
+  // attempt history + XP so dashboards/leaderboards/stats look alive.
+  // Answers are simulated per student "skill" and graded with the real engine, so `answers`/`result`
+  // are consistent with what POST /attempts/:id/submit would store.
+  const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
+  const OPEN_ANSWERS = [
+    'Last weekend I visited my grandparents in Quba. We cooked dolma together and I helped my grandmother in the garden. On Sunday I watched a film with my brother.',
+    'On Saturday I went to the Boulevard with my friends. We have eaten ice cream and took a lot of photos. In the evening I did my homework.',
+    'I stayed at home because it was raining. I read an English book and played chess with my father. On Sunday we went to the cinema.',
+    'Last weekend I go to the park and play football with my cousins. It was very fun but I am tired after it.',
+  ];
+  const simulate = (view: ViewQuestion, p: number, k: number): unknown => {
+    const ok = Math.random() < p;
+    const c = view.correct as any;
+    switch (view.type) {
+      case 'SINGLE': {
+        if (ok) return c.index;
+        const others = view.options.map((_, i) => i).filter((i) => i !== c.index);
+        return pick(others);
+      }
+      case 'MULTIPLE':
+        return ok ? c.indices : c.indices.slice(1).concat(view.options.findIndex((_, i) => !c.indices.includes(i)));
+      case 'TEXT': {
+        const a = pick(c.answers as string[]);
+        return ok ? (Math.random() < 0.3 ? `  ${a.toUpperCase()} ` : a) : a.slice(0, -1) + (a.endsWith('d') ? 't' : 'ed');
+      }
+      case 'TRUE_FALSE':
+        return ok ? c.value : !c.value;
+      case 'ORDERING': {
+        const items = [...(view.correctOrder ?? view.options)];
+        if (!ok) [items[0], items[1]] = [items[1], items[0]];
+        return items;
+      }
+      case 'FILL_BLANKS':
+        return (c.blanks as string[][]).map((variants, i, all) =>
+          Math.random() < p ? pick(variants) : all[(i + 1) % all.length][0] === variants[0] ? '—' : all[(i + 1) % all.length][0],
+        );
+      case 'OPEN':
+        return OPEN_ANSWERS[k % OPEN_ANSWERS.length];
+      default:
+        return null;
+    }
+  };
+
+  const fakeAttempt = async (opts: { quiz: (typeof quizzes)[number]; userId: string; skill: number; when: Date; k: number; pending?: boolean }) => {
+    const { quiz, userId, skill, when, k } = opts;
+    const timeSpentSec = 90 + Math.floor(Math.random() * 420);
+    const created = await prisma.attempt.create({
+      data: { quizId: quiz.id, userId, mode: 'EXAM', status: 'IN_PROGRESS', questionOrder: quiz.questions.map((q) => q.id), startedAt: new Date(when.getTime() - timeSpentSec * 1000) },
+    });
+    const answers: Record<string, unknown> = {};
+    const result: Record<string, QuestionResult> = {};
+    let hasOpen = false;
+    for (const [qi, q] of quiz.questions.entries()) {
+      const view = viewQuestion(q, { seed: created.id, shuffleOptions: quiz.shuffleOptions });
+      const difficulty = ((qi * 37) % 7) / 20 - 0.1; // -0.10 … +0.20 per question
+      answers[q.id] = simulate(view, clamp(skill - difficulty, 0.1, 0.98), k);
+      result[q.id] = gradeQuestion(view, answers[q.id]);
+      if (q.type === 'OPEN') {
+        hasOpen = true;
+        if (!opts.pending) {
+          const pts = clamp(Math.round(q.points * (skill + (Math.random() - 0.5) * 0.3)), 0, q.points);
+          result[q.id] = { correct: pts >= q.points, points: pts, max: q.points };
+        }
+      }
+    }
+    const sum = summarize(result, quiz.passPercent);
+    const status = hasOpen ? (opts.pending ? 'PENDING_REVIEW' : 'GRADED') : 'SUBMITTED';
+    await prisma.attempt.update({
+      where: { id: created.id },
+      data: {
+        status, answers: answers as Prisma.InputJsonValue, result: result as unknown as Prisma.InputJsonValue,
+        score: sum.score, maxScore: sum.maxScore, percent: sum.percent, passed: sum.passed, timeSpentSec, submittedAt: when,
+        feedback: status === 'GRADED' && Math.random() < 0.4 ? pick(['Əla iş! Davam et.', 'Zaman formalarına bir daha bax.', 'Yaxşıdır, amma artikllara diqqət et.']) : null,
+      },
+    });
+    const gained = Math.round(sum.percent / 10) + 5 + (sum.percent >= 100 ? 20 : 0);
+    await prisma.xpEvent.create({ data: { userId, amount: gained, reason: 'QUIZ_SUBMITTED', createdAt: when } });
+    return gained;
+  };
+
+  const skills = students.map((_, i) => clamp(0.95 - i * 0.05 + (Math.random() - 0.5) * 0.1, 0.35, 0.97));
+  for (const [i, s] of students.entries()) {
     let xp = 0;
     const n = 3 + Math.floor(Math.random() * 10);
     for (let k = 0; k < n; k++) {
-      const quiz = pick(quizzes);
-      const autoQs = quiz.questions.filter((q) => q.type !== 'OPEN');
-      const maxScore = autoQs.reduce((a, q) => a + q.points, 0);
-      const percent = Math.round(45 + Math.random() * 55);
-      const score = Math.round((maxScore * percent) / 100);
-      const when = daysAgo(Math.floor(Math.random() * 60));
-      await prisma.attempt.create({
-        data: {
-          quizId: quiz.id, userId: s.id, mode: 'EXAM', status: 'GRADED', answers: {}, questionOrder: autoQs.map((q) => q.id),
-          result: {}, score, maxScore, percent, passed: percent >= quiz.passPercent, timeSpentSec: 120 + Math.floor(Math.random() * 400),
-          startedAt: when, submittedAt: when,
-        },
-      });
-      const gained = Math.round(percent / 10) + 5;
-      xp += gained;
-      await prisma.xpEvent.create({ data: { userId: s.id, amount: gained, reason: 'QUIZ_SUBMITTED', createdAt: when } });
+      xp += await fakeAttempt({ quiz: pick(quizzes), userId: s.id, skill: skills[i], when: daysAgo(2 + Math.random() * 58), k: i + k });
     }
+    // fresh OPEN-answer attempts waiting for the teacher (GET /attempts/pending-review)
+    if (i < 3) xp += await fakeAttempt({ quiz: quizzes[0], userId: s.id, skill: skills[i], when: new Date(Date.now() - (i + 1) * 3_600_000), k: i, pending: true });
     await prisma.user.update({ where: { id: s.id }, data: { xp, level: Math.floor(Math.sqrt(xp / 100)) + 1, streak: Math.floor(Math.random() * 9) } });
   }
+
+  // unlock the obvious achievements for students who already have history
+  const [firstQuiz, perfect] = await Promise.all([
+    prisma.achievement.findUniqueOrThrow({ where: { code: 'first-quiz' } }),
+    prisma.achievement.findUniqueOrThrow({ where: { code: 'perfect' } }),
+  ]);
+  const perfectUsers = await prisma.attempt.findMany({ where: { percent: { gte: 100 } }, distinct: ['userId'], select: { userId: true } });
+  await prisma.userAchievement.createMany({
+    data: [
+      ...students.map((s) => ({ userId: s.id, achievementId: firstQuiz.id, unlockedAt: daysAgo(30) })),
+      ...perfectUsers.map((p) => ({ userId: p.userId, achievementId: perfect.id, unlockedAt: daysAgo(3) })),
+    ],
+  });
 
   console.log(`Seeded: ${students.length} students, ${quizzes.length} quizzes, admin=${admin.email}, teacher=${seda.email}`);
 }

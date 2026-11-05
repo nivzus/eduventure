@@ -67,9 +67,13 @@ interface ColumnChartProps {
   className?: string;
   /** dim while refetching (keeps the frame) */
   stale?: boolean;
+  /** print the value above each column */
+  showValues?: boolean;
+  /** ink outline on columns (notebook "sticker" look) */
+  inked?: boolean;
 }
 
-export function ColumnChart({ data, height = 240, touching, color = 'var(--signal)', valueLabel, marker, ariaLabel, className, stale }: ColumnChartProps) {
+export function ColumnChart({ data, height = 240, touching, color = 'var(--signal)', valueLabel, marker, ariaLabel, className, stale, showValues, inked = true }: ColumnChartProps) {
   const [ref, width] = useElementWidth<HTMLDivElement>();
   const reduce = useReducedMotion();
   const [hover, setHover] = useState<number | null>(null);
@@ -77,14 +81,14 @@ export function ColumnChart({ data, height = 240, touching, color = 'var(--signa
 
   const PAD_L = 34;
   const PAD_R = 6;
-  const PAD_T = 10;
+  const PAD_T = showValues ? 20 : 10;
   const AXIS = 26;
   const plotW = Math.max(0, width - PAD_L - PAD_R);
   const plotH = height - PAD_T - AXIS;
   const n = data.length || 1;
   const band = plotW / n;
   const gap = touching ? 2 : Math.max(2, band * 0.35);
-  const barW = Math.max(1, Math.min(24, band - gap));
+  const barW = Math.max(1, Math.min(touching ? 64 : 28, band - gap));
   const max = Math.max(0, ...data.map((d) => d.value));
   const ticks = niceTicks(max);
   const top = ticks[ticks.length - 1] || 1;
@@ -114,6 +118,9 @@ export function ColumnChart({ data, height = 240, touching, color = 'var(--signa
                 <motion.path
                   d={columnPath(cx - barW / 2, y(d.value), barW, h)}
                   fill={fill}
+                  stroke={inked ? 'var(--ink)' : undefined}
+                  strokeWidth={inked ? 1.5 : undefined}
+                  strokeLinejoin="round"
                   initial={reduce ? false : { scaleY: 0 }}
                   animate={{ scaleY: 1, opacity: hover == null || hover === i ? 1 : 0.55 }}
                   transition={{ scaleY: { duration: 0.7, delay: 0.1 + i * Math.min(0.03, 0.6 / n), ease: EASE }, opacity: { duration: 0.15 } }}
@@ -133,6 +140,11 @@ export function ColumnChart({ data, height = 240, touching, color = 'var(--signa
                   onBlur={() => setHover(null)}
                   className="outline-none"
                 />
+                {showValues && d.value > 0 && (
+                  <text x={cx} y={y(d.value) - 6} textAnchor="middle" className="fill-[var(--fg)] font-mono text-[11px] font-semibold tabular">
+                    {fmt(d.value)}
+                  </text>
+                )}
                 {i % labelEvery === 0 && (
                   <text x={cx} y={height - 8} textAnchor="middle" className="fill-[var(--fg-subtle)] font-mono text-[10px]">
                     {d.label}
@@ -196,7 +208,7 @@ export interface HBarDatum {
   href?: string;
 }
 
-export function HBarList({ data, max, color = 'var(--signal)', className, emptyLabel = 'Məlumat yoxdur' }: { data: HBarDatum[]; max?: number; color?: string; className?: string; emptyLabel?: string }) {
+export function HBarList({ data, max, color = 'var(--signal)', className, emptyLabel = 'Məlumat yoxdur', inked }: { data: HBarDatum[]; max?: number; color?: string; className?: string; emptyLabel?: string; inked?: boolean }) {
   const reduce = useReducedMotion();
   const m = max ?? Math.max(1, ...data.map((d) => d.value));
   if (!data.length) return <p className="py-6 text-center text-sm text-subtle">{emptyLabel}</p>;
@@ -208,7 +220,7 @@ export function HBarList({ data, max, color = 'var(--signal)', className, emptyL
             <span className="min-w-0 truncate text-fg">{d.label}</span>
             <span className="shrink-0 font-mono text-xs tabular text-muted">{d.display ?? formatNumber(d.value)}</span>
           </div>
-          <div className="relative h-2 w-full overflow-hidden rounded-full bg-sunken">
+          <div className={cn('relative w-full overflow-hidden rounded-full bg-sunken', inked ? 'h-3.5 border-2 border-ink' : 'h-2')}>
             <motion.div
               className="absolute inset-y-0 left-0 rounded-r-[4px]"
               style={{ background: d.color ?? color }}
@@ -265,4 +277,167 @@ export function useStableData<T>(data: T | undefined): T | undefined {
   const last = useRef(data);
   if (data !== undefined) last.current = data;
   return useMemo(() => last.current, [data]); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+/* ─────────── TrailLine: hand-drawn line on ruled paper ─────────── */
+
+export interface LineDatum {
+  key: string;
+  label: string;
+  value: number;
+  title?: string;
+}
+
+function smoothPath(pts: [number, number][]) {
+  if (pts.length < 2) return pts.length ? `M${pts[0][0]},${pts[0][1]}` : '';
+  let d = `M${pts[0][0]},${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] ?? pts[i];
+    const p1 = pts[i];
+    const p2 = pts[i + 1];
+    const p3 = pts[i + 2] ?? p2;
+    const t = 0.18;
+    const c1x = p1[0] + (p2[0] - p0[0]) * t;
+    const c2x = p2[0] - (p3[0] - p1[0]) * t;
+    // clamp control y between neighbours → no overshoot below 0
+    const lo = Math.min(p1[1], p2[1]);
+    const hi = Math.max(p1[1], p2[1]);
+    const c1y = Math.min(hi, Math.max(lo, p1[1] + (p2[1] - p0[1]) * t));
+    const c2y = Math.min(hi, Math.max(lo, p2[1] - (p3[1] - p1[1]) * t));
+    d += `C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)}`;
+  }
+  return d;
+}
+
+export function TrailLine({
+  data,
+  height = 240,
+  color = 'var(--signal)',
+  valueLabel,
+  ariaLabel,
+  className,
+}: {
+  data: LineDatum[];
+  height?: number;
+  color?: string;
+  valueLabel?: (v: number) => string;
+  ariaLabel: string;
+  className?: string;
+}) {
+  const [ref, width] = useElementWidth<HTMLDivElement>();
+  const reduce = useReducedMotion();
+  const [hover, setHover] = useState<number | null>(null);
+  const fmt = valueLabel ?? ((v: number) => formatNumber(v));
+  const PAD_L = 34;
+  const PAD_R = 14;
+  const PAD_T = 22;
+  const AXIS = 26;
+  const plotW = Math.max(0, width - PAD_L - PAD_R);
+  const plotH = height - PAD_T - AXIS;
+  const n = data.length;
+  const max = Math.max(0, ...data.map((d) => d.value));
+  const ticks = niceTicks(max);
+  const top = ticks[ticks.length - 1] || 1;
+  const x = (i: number) => PAD_L + (n <= 1 ? plotW / 2 : (plotW * i) / (n - 1));
+  const y = (v: number) => PAD_T + plotH - (v / top) * plotH;
+  const pts = data.map((d, i) => [x(i), y(d.value)] as [number, number]);
+  const line = smoothPath(pts);
+  const area = pts.length > 1 ? `${line}L${pts[pts.length - 1][0]},${PAD_T + plotH}L${pts[0][0]},${PAD_T + plotH}Z` : '';
+  const labelEvery = Math.max(1, Math.ceil(n / Math.max(1, plotW / 52)));
+  const peak = data.reduce((b, d, i) => (d.value > (data[b]?.value ?? -1) ? i : b), 0);
+
+  return (
+    <div ref={ref} className={cn('relative w-full', className)} style={{ height }}>
+      {width > 0 && n > 0 && (
+        <svg width={width} height={height} role="img" aria-label={ariaLabel} onPointerLeave={() => setHover(null)}>
+          {ticks.map((t) => (
+            <g key={t}>
+              <line x1={PAD_L} x2={width - PAD_R} y1={y(t)} y2={y(t)} stroke="var(--border-strong)" strokeWidth={1} strokeDasharray={t === 0 ? undefined : '3 5'} />
+              <text x={PAD_L - 8} y={y(t) + 3.5} textAnchor="end" className="fill-[var(--fg-subtle)] font-mono text-[10px] tabular">
+                {formatNumber(t)}
+              </text>
+            </g>
+          ))}
+          <motion.path d={area} fill={color} initial={reduce ? false : { opacity: 0 }} animate={{ opacity: 0.14 }} transition={{ duration: 0.8, delay: 0.5 }} />
+          {/* faint double stroke = marker pen */}
+          <motion.path
+            d={line}
+            fill="none"
+            stroke={color}
+            strokeOpacity={0.35}
+            strokeWidth={2}
+            strokeLinecap="round"
+            transform="translate(1.5 1.5)"
+            initial={reduce ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.1, ease: EASE, delay: 0.1 }}
+          />
+          <motion.path
+            d={line}
+            fill="none"
+            stroke={color}
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            initial={reduce ? false : { pathLength: 0 }}
+            animate={{ pathLength: 1 }}
+            transition={{ duration: 1.1, ease: EASE }}
+          />
+          {pts.map(([px, py], i) => (
+            <g key={data[i].key}>
+              <motion.circle
+                cx={px}
+                cy={py}
+                r={hover === i ? 5.5 : data[i].value > 0 ? 3.5 : 2.5}
+                fill={hover === i ? color : 'var(--bg-elev)'}
+                stroke="var(--ink)"
+                strokeWidth={1.5}
+                initial={reduce ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 + (i / Math.max(1, n)) * 0.8 }}
+              />
+              <rect
+                x={px - plotW / Math.max(1, n - 1) / 2}
+                y={PAD_T}
+                width={plotW / Math.max(1, n - 1)}
+                height={plotH}
+                fill="transparent"
+                tabIndex={0}
+                aria-label={`${data[i].title ?? data[i].label}: ${fmt(data[i].value)}`}
+                onPointerEnter={() => setHover(i)}
+                onFocus={() => setHover(i)}
+                onBlur={() => setHover(null)}
+                className="outline-none"
+              />
+              {i % labelEvery === 0 && (
+                <text x={px} y={height - 8} textAnchor="middle" className="fill-[var(--fg-subtle)] font-mono text-[10px]">
+                  {data[i].label}
+                </text>
+              )}
+            </g>
+          ))}
+          {max > 0 && hover == null && (
+            <text x={pts[peak][0]} y={pts[peak][1] - 10} textAnchor="middle" className="fill-[var(--fg)] font-mono text-[11px] font-semibold tabular">
+              {fmt(data[peak].value)}
+            </text>
+          )}
+        </svg>
+      )}
+      <AnimatePresence>
+        {hover != null && data[hover] && (
+          <motion.div
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full whitespace-nowrap rounded-xl border-2 border-ink bg-elev px-3 py-1.5 shadow-stamp-sm"
+            style={{ left: Math.min(Math.max(pts[hover][0], 60), width - 60), top: Math.max(pts[hover][1] - 10, 30) }}
+          >
+            <p className="font-display text-sm font-bold">{fmt(data[hover].value)}</p>
+            <p className="hand text-base leading-none text-muted">{data[hover].title ?? data[hover].label}</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }

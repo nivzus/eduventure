@@ -15,6 +15,8 @@ import { AttemptsModule } from './modules/attempts/attempts.module';
 import { PracticeModule } from './modules/practice/practice.module';
 import { BankModule } from './modules/bank/bank.module';
 import { AiModule } from './modules/ai/ai.module';
+import { StatsModule } from './modules/stats/stats.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
 import { ArticlesModule } from './modules/articles/articles.module';
 import { AssignmentsModule } from './modules/assignments/assignments.module';
 import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
@@ -40,6 +42,8 @@ import { SearchModule } from './modules/search/search.module';
     PracticeModule,
     BankModule,
     AiModule,
+    StatsModule,
+    UploadsModule,
     // ── API-CONTENT modules ──
     ContentModule,
     ArticlesModule,

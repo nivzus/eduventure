@@ -274,27 +274,31 @@ export class GamificationService {
 
   private async ruleSatisfied(rule: AchievementRule | null | undefined, s: StatsCache): Promise<boolean> {
     if (!rule || typeof rule !== 'object' || !('type' in rule)) return false;
-    switch (rule.type) {
+    // tolerant: upper-case types ("QUIZZES") and a generic threshold field (count|days|amount|level)
+    const r = rule as unknown as Record<string, unknown>;
+    const n = Number(r.count ?? r.days ?? r.amount ?? r.level ?? NaN);
+    if (!Number.isFinite(n)) return false;
+    switch (String(r.type).toLowerCase()) {
       case 'quizzes':
-        return (await s.quizzes()) >= rule.count;
+        return (await s.quizzes()) >= n;
       case 'passed':
-        return (await s.passed()) >= rule.count;
+        return (await s.passed()) >= n;
       case 'perfect':
-        return (await s.perfect()) >= rule.count;
+        return (await s.perfect()) >= n;
       case 'practice':
-        return (await s.practice()) >= rule.count;
+        return (await s.practice()) >= n;
       case 'streak':
-        return (await s.user()).streak >= rule.days;
+        return (await s.user()).streak >= n;
       case 'xp':
-        return (await s.user()).xp >= rule.amount;
+        return (await s.user()).xp >= n;
       case 'level':
-        return (await s.user()).level >= rule.level;
+        return (await s.user()).level >= n;
       case 'articles':
-        return (await s.articles()) >= rule.count;
+        return (await s.articles()) >= n;
       case 'courses':
-        return (await s.courses()) >= rule.count;
+        return (await s.courses()) >= n;
       case 'cards':
-        return (await s.cards()) >= rule.count;
+        return (await s.cards()) >= n;
       default:
         return false;
     }

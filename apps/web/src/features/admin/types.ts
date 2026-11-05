@@ -11,6 +11,8 @@ export interface AdminUser {
   streak?: number;
   lastActiveAt?: string | null;
   createdAt?: string;
+  attemptsCount?: number;
+  groupsCount?: number;
 }
 
 export interface AdminAttempt {
@@ -125,4 +127,56 @@ export interface PickableContent {
   type: ContentType;
   status?: string;
   slug?: string;
+}
+
+/* ─────────── normalized views (API shape tolerant) ─────────── */
+
+export interface OverviewView {
+  users: number | null;
+  activeUsers7d: number | null;
+  quizzes: number | null;
+  attempts: number | null;
+  avgPercent: number | null;
+  attemptsByDay: { date: string; count: number }[];
+  topQuizzes: { id: string; title: string; attempts: number; avgPercent: number | null }[];
+  recentAttempts: AdminAttempt[];
+  pendingReview?: number;
+  /** computed client-side because /stats/overview was unavailable */
+  derived?: boolean;
+}
+
+export interface QuizStatsUserRow {
+  userId: string;
+  name: string;
+  avatarUrl?: string | null;
+  attempts: number;
+  bestPercent: number | null;
+  avgPercent: number | null;
+  lastAt?: string | null;
+}
+
+export interface QuizStatsView {
+  quiz: { id: string; title: string; passPercent?: number; category?: string | null };
+  attempts: number;
+  avgPercent: number | null;
+  /** 0–1 */
+  passRate: number | null;
+  avgTimeSec: number | null;
+  distribution: { label: string; count: number }[];
+  /** correctRate 0–1 */
+  questions: { id: string; text: string; type: string; correctRate: number | null; avgPoints: number | null; maxPoints?: number }[];
+  byUser: QuizStatsUserRow[];
+  derived?: boolean;
+}
+
+export interface GroupStatsView {
+  members: number | null;
+  attempts: number | null;
+  avgPercent: number | null;
+  /** 0–1 */
+  passRate: number | null;
+  /** 0–1 */
+  completionRate: number | null;
+  byUser: QuizStatsUserRow[];
+  derived?: boolean;
 }

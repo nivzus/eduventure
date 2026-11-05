@@ -18,12 +18,13 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const AGAIN_DELAY_MS = 10 * 60 * 1000; // "again" cards come back in 10 minutes
 
 export function sm2(prev: Sm2State, grade: number, now = new Date()): Sm2Result {
-  const quality = GRADE_TO_QUALITY[Math.max(0, Math.min(3, Math.round(grade)))];
+  const g = Math.max(0, Math.min(3, Math.round(grade) || 0));
+  const quality = GRADE_TO_QUALITY[g];
   let { ease, interval, repetitions } = prev;
 
   if (quality < 3) {
     repetitions = 0;
-    interval = grade === 0 ? 0 : 1;
+    interval = g === 0 ? 0 : 1;
   } else {
     if (repetitions === 0) interval = 1;
     else if (repetitions === 1) interval = 6;
