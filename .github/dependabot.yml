@@ -17,6 +17,11 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # 0.x packages: a "minor" bump can be breaking — upgrade by hand
+      - dependency-name: "class-validator"
+        update-types: ["version-update:semver-minor"]
+      - dependency-name: "class-transformer"
+        update-types: ["version-update:semver-minor"]
 
   - package-ecosystem: npm
     directory: /apps/web
