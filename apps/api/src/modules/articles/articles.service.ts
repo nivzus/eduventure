@@ -290,12 +290,22 @@ export class ArticlesService {
       where: { userId_articleId: { userId: user.id, articleId: article.id } },
     });
     const progress = Math.max(prev?.progress ?? 0, pct);
-    const completesNow = progress >= 100 && !prev?.completedAt;
-    const saved = await this.prisma.articleProgress.upsert({
-      where: { userId_articleId: { userId: user.id, articleId: article.id } },
-      create: { userId: user.id, articleId: article.id, progress, completedAt: completesNow ? new Date() : null },
-      update: { progress, ...(completesNow ? { completedAt: new Date() } : {}) },
+    const key = { userId_articleId: { userId: user.id, articleId: article.id } };
+    await this.prisma.articleProgress.upsert({
+      where: key,
+      create: { userId: user.id, articleId: article.id, progress },
+      update: { progress },
     });
+    // Atomic "first completion" so concurrent requests can't double-award XP.
+    const completesNow =
+      progress >= 100 &&
+      (
+        await this.prisma.articleProgress.updateMany({
+          where: { userId: user.id, articleId: article.id, completedAt: null },
+          data: { completedAt: new Date() },
+        })
+      ).count === 1;
+    const saved = (await this.prisma.articleProgress.findUnique({ where: key }))!;
 
     let reward = { xpGained: 0, levelUp: false, newAchievements: [] as unknown[] };
     if (completesNow) {

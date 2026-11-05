@@ -9,6 +9,16 @@ import { AuthModule } from './modules/auth/auth.module';
 import { GamificationModule } from './modules/gamification/gamification.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 // ── API-CONTENT modules: add imports below this line ──
+import { ArticlesModule } from './modules/articles/articles.module';
+import { AssignmentsModule } from './modules/assignments/assignments.module';
+import { BookmarksModule } from './modules/bookmarks/bookmarks.module';
+import { CommentsModule } from './modules/comments/comments.module';
+import { ContentModule } from './modules/content/content.module';
+import { CoursesModule } from './modules/courses/courses.module';
+import { DecksModule } from './modules/decks/decks.module';
+import { GroupsModule } from './modules/groups/groups.module';
+import { PathsModule } from './modules/paths/paths.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -19,6 +29,16 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     AuthModule,
     // ── API-CORE modules ──
     // ── API-CONTENT modules ──
+    ContentModule,
+    ArticlesModule,
+    CoursesModule,
+    PathsModule,
+    DecksModule,
+    GroupsModule,
+    AssignmentsModule,
+    CommentsModule,
+    BookmarksModule,
+    SearchModule,
   ],
   controllers: [HealthController],
   providers: [

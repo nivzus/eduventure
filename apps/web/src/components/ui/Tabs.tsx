@@ -104,7 +104,7 @@ export function Segmented<T extends string = string>({ tabs, value, onChange, cl
       aria-label={rest['aria-label']}
       onKeyDown={onKeyDown}
       className={cn(
-        'relative inline-flex items-center gap-0.5 rounded-full border border-line bg-sunken/70 p-1 light:bg-bg-elev',
+        'relative inline-flex items-center gap-0.5 rounded-full border border-line bg-sunken/70 p-1 light:bg-elev',
         fill && 'flex w-full',
         className,
       )}

@@ -169,7 +169,7 @@
 }
 
 /* Serif italic accent word inside headlines */
-@utility accent {
+@utility serif-accent {
   font-family: var(--font-serif);
   font-style: italic;
   font-weight: 400;
@@ -361,4 +361,17 @@ html.lenis body {
 }
 .lenis.lenis-stopped {
   overflow: hidden;
+}
+
+@keyframes sheen {
+  from { transform: translateX(0) skewX(-20deg); }
+  to { transform: translateX(420%) skewX(-20deg); }
+}
+
+/* Smooth theme switch */
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: background-color 0.35s var(--ease-out-expo), border-color 0.35s var(--ease-out-expo), color 0.25s var(--ease-out-expo) !important;
 }

@@ -37,7 +37,7 @@ export function KineticText({ text, className, accentClassName, delay = 0, stagg
             const node: ReactNode = (
               <span className="inline-block overflow-hidden pb-[0.12em] -mb-[0.12em] align-bottom">
                 <motion.span
-                  className={cn('inline-block will-change-transform', accent && cn('accent pr-[0.06em]', accentClassName))}
+                  className={cn('inline-block will-change-transform', accent && cn('serif-accent pr-[0.06em]', accentClassName))}
                   variants={{
                     hidden: reduce ? { opacity: 0 } : { y: '110%', rotate: 4, opacity: 0 },
                     show: {

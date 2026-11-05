@@ -4,7 +4,8 @@
  *
  * The wordmark is a monoline "trail" alphabet: every glyph is a centre-line path
  * stroked at STROKE units with round caps/joins (so it can be drawn in like a
- * trail with pathLength). Grid: ascender top 0, x-height 12, baseline 40.
+ * trail with pathLength). Grid: ascender top 0, x-height ≈12, baseline 40.
+ * The `v` is the only sharp (mitred) vertex — a valley that echoes the needle.
  *
  * The "Compass E": the E's middle arm is a compass needle pointing East —
  * forward. It is the monogram, and the first letter of the wordmark.
@@ -77,8 +78,8 @@ const KERN: [string, number][] = [
   ['e', 3.5],
 ];
 
-/** Start of the lowercase run, after the Compass-E (needle tip at x=31). */
-const E_ADVANCE = 30;
+/** Start of the lowercase run, after the Compass-E (needle tip at x=33). */
+const E_ADVANCE = 32.5;
 
 export const WORD_GLYPHS: { d: string; sharp: boolean }[] = (() => {
   let x = E_ADVANCE;
@@ -100,4 +101,4 @@ export const WORD_WIDTH: number = (() => {
 
 /** viewBoxes include half-stroke + round-join overshoot. */
 export const VIEWBOX_FULL = `-1.5 -1.5 ${f(WORD_WIDTH + 3)} 44`;
-export const VIEWBOX_MARK = '-5 -1.5 43 43';
+export const VIEWBOX_MARK = '-5.25 -1.5 43 43';

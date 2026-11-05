@@ -68,7 +68,8 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh \
  && mkdir -p /app/uploads \
  && chown -R node:node /app/uploads
 
-USER node
+# No `USER node` here on purpose: the entrypoint starts as root only to chown the uploads
+# volume (PaaS volumes are root-owned) and then re-execs everything as `node` via setpriv.
 EXPOSE 4000
 
 # Any HTTP answer < 500 means Nest is up (a dedicated /api/health route is optional).

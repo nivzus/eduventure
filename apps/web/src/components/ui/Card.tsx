@@ -40,23 +40,24 @@ export function Card({ interactive, padded = true, href, as = 'div', glow, class
       {children}
     </>
   );
-  const move = isInteractive
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const move: any = isInteractive
     ? (e: React.PointerEvent<HTMLElement>) => {
         spot(e);
-        onPointerMove?.(e as React.PointerEvent<HTMLDivElement>);
+        onPointerMove?.(e as unknown as React.PointerEvent<HTMLDivElement>);
       }
     : onPointerMove;
 
   if (href) {
     return (
-      <Link href={href} className={cls} onPointerMove={move as React.PointerEventHandler<HTMLAnchorElement>} {...(rest as HTMLAttributes<HTMLAnchorElement>)}>
+      <Link href={href} className={cls} onPointerMove={move} {...(rest as HTMLAttributes<HTMLAnchorElement>)}>
         {inner}
       </Link>
     );
   }
-  const Comp = as;
+  const Comp = as as 'div';
   return (
-    <Comp className={cls} onPointerMove={move as React.PointerEventHandler<HTMLDivElement>} {...rest}>
+    <Comp className={cls} onPointerMove={move} {...rest}>
       {inner}
     </Comp>
   );
